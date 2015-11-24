@@ -24,7 +24,7 @@ func (v *VarCollection) Merge(src string) MergedVars {
 	merged := MergedVars{}
 	for _, buck := range *v {
 		for k, v := range buck.Vars {
-			merged.append(k, v, src, buck.Name)
+			merged.InsertAsNewest(k, v, src, buck.Name, 0)
 		}
 	}
 	return merged
@@ -42,12 +42,21 @@ func (v *VarCollection) AddOrReplace(n VarBucket) {
 }
 
 type Merged struct {
-	Key           string
-	Value         interface{}
-	Source        string
-	SourceBucket  string
-	Overwritten   bool
-	OverwrittenBy *Merged
+	Key          string
+	Value        interface{}
+	Source       string
+	SourceBucket string
+	Old          *Merged
+	Distance     int
+	Tainting     *Merged
+}
+
+func (m Merged) String() string {
+	tainting := ""
+	if m.Tainting != nil {
+		tainting = fmt.Sprintf(", Tainting: `%s/%s`", m.Tainting.Source, m.Tainting.SourceBucket)
+	}
+	return fmt.Sprintf("Key: `%s`, Value: {%s}, Source: `%s/%s`, Dist: %d%s \n", m.Key, m.Value, m.Source, m.SourceBucket, m.Distance, tainting)
 }
 
 type MergedVars []*Merged
@@ -56,30 +65,94 @@ func (m MergedVars) String() string {
 	var out string
 
 	for _, v := range m {
-		if v.Overwritten {
-			out += "OVERWRITTEN BY `" + v.OverwrittenBy.Source + "/" + v.SourceBucket + "`: "
+		history := ""
+		current := v
+		indent := ""
+		for true {
+			if current.Old != nil {
+				indent += "-"
+				history += indent + " " + current.Old.String()
+				current = current.Old
+			} else {
+				break
+			}
 		}
-		out += fmt.Sprintf("Key: `%s`, Value: {%s}, Source: `%s/%s` \n", v.Key, v.Value, v.Source, v.SourceBucket)
+		out += fmt.Sprintf("%s%s", v.String(), history)
 	}
 
 	return out
 }
 
-func (m *MergedVars) append(key string, value interface{}, source string, bucket string) {
+func (m *MergedVars) InsertAsNewest(key string, value interface{}, source string, bucket string, dist int) {
 	v := &Merged{
 		Key:          key,
 		Value:        value,
 		Source:       source,
 		SourceBucket: bucket,
-		Overwritten:  false,
+		Distance:     dist,
 	}
 
-	for _, mv := range *m {
-		if mv.Key == key && !mv.Overwritten {
-			mv.OverwrittenBy = v
-			mv.Overwritten = true
+	found := false
+	for k, mv := range *m {
+		if mv.Key == key {
+			v.Old = mv
+			(*m)[k] = v
+			found = true
+			break
 		}
 	}
 
-	*m = append(*m, v)
+	if !found {
+		*m = append(*m, v)
+	}
+}
+
+func (m *MergedVars) InsertNearer(v *Merged) {
+	found := false
+	for k, mv := range *m {
+		if mv.Key == v.Key {
+			found = true
+			if mv.Distance > v.Distance {
+				v.Old = mv
+				(*m)[k] = v
+			} else if mv.Distance == v.Distance {
+				mv.Tainting = v
+			}
+			break
+		}
+	}
+
+	if !found {
+		*m = append(*m, v)
+	}
+}
+
+func (m *MergedVars) InsertAsOldest(key string, value interface{}, source string, bucket string, dist int) {
+	v := &Merged{
+		Key:          key,
+		Value:        value,
+		Source:       source,
+		SourceBucket: bucket,
+		Distance:     dist,
+	}
+
+	inserted := false
+	for _, mv := range *m {
+		if mv.Key == key {
+			oldest := mv
+			for true {
+				if oldest.Old != nil {
+					oldest = oldest.Old
+				} else {
+					mv.Old = v
+					inserted = true
+					break
+				}
+			}
+			break
+		}
+	}
+	if !inserted {
+		*m = append(*m, v)
+	}
 }

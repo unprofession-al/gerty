@@ -51,7 +51,7 @@ func TestVarsMerge(t *testing.T) {
 	for rk, rv := range results {
 		found := false
 		for _, v := range merged {
-			if v.Key == rk && !v.Overwritten {
+			if v.Key == rk {
 				found = true
 				if v.Value != rv {
 					t.Errorf("Var `%s` has value `%s`, should have `%s`", rk, v.Value, results[v.Key])
