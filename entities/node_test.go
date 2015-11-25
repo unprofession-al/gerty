@@ -138,7 +138,7 @@ var r = map[string]*Role{
 	},
 }
 
-var node_results = map[string]interface{}{
+var nodeResults = map[string]interface{}{
 	"Var 1": "Value H",
 	"Var 2": "Value B",
 	"Var 3": "Value G",
@@ -161,13 +161,13 @@ var tainting = map[string]bool{
 }
 
 func TestNodeMerging(t *testing.T) {
-	r["a"].AddChild(r["b"])
-	r["a"].AddChild(r["c"])
-	r["b"].AddChild(r["d"])
-	r["b"].AddChild(r["e"])
-	r["c"].AddChild(r["f"])
-	r["d"].AddChild(r["g"])
-	r["d"].AddChild(r["h"])
+	r["a"].LinkChild(r["b"])
+	r["a"].LinkChild(r["c"])
+	r["b"].LinkChild(r["d"])
+	r["b"].LinkChild(r["e"])
+	r["c"].LinkChild(r["f"])
+	r["d"].LinkChild(r["g"])
+	r["d"].LinkChild(r["h"])
 
 	node := Node{
 		Name:  "Test",
@@ -185,13 +185,13 @@ func TestNodeMerging(t *testing.T) {
 
 	vars := node.GetVars()
 	fmt.Println(vars)
-	for rk, rv := range node_results {
+	for rk, rv := range nodeResults {
 		found := false
 		for _, v := range vars {
 			if v.Key == rk {
 				found = true
 				if v.Value != rv {
-					t.Errorf("Var `%s` has value `%s`, should have `%s`", rk, v.Value, node_results[v.Key])
+					t.Errorf("Var `%s` has value `%s`, should have `%s`", rk, v.Value, nodeResults[v.Key])
 				}
 				taint := false
 				if v.Tainting != nil {

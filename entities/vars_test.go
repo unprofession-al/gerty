@@ -43,7 +43,7 @@ var results = map[string]interface{}{
 func TestVarsMerge(t *testing.T) {
 	c := VarCollection{}
 	for _, bucket := range tests {
-		c.AddOrReplace(bucket)
+		c.AddOrReplaceBucket(bucket)
 	}
 
 	merged := c.Merge("Test")
@@ -67,8 +67,8 @@ func TestVarsMerge(t *testing.T) {
 func TestVarsAddReplace(t *testing.T) {
 	c := VarCollection{}
 	for _, bucket := range tests {
-		c.AddOrReplace(bucket)
-		c.AddOrReplace(bucket) // add bucket twice
+		c.AddOrReplaceBucket(bucket)
+		c.AddOrReplaceBucket(bucket) // add bucket twice
 	}
 
 	expected := len(tests)

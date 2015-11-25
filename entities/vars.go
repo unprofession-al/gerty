@@ -5,20 +5,33 @@ import (
 	"sort"
 )
 
+// VarList holds variables in a key/value like manner.
 type VarList map[string]interface{}
 
+// VarBucket adds a name and a priority to a VarList.
 type VarBucket struct {
 	Name string
-	Prio int
+	Prio int // lower value means higher priority
 	Vars VarList
 }
 
+// VarCollection groups together multiple VarBuckets. This entity is
+// referenced by nodes and roles.
 type VarCollection []VarBucket
 
-func (v VarCollection) Len() int           { return len(v) }
-func (v VarCollection) Swap(i, j int)      { v[i], v[j] = v[j], v[i] }
+// Len returns the lenght of the list, part of implementing the sort interface.
+func (v VarCollection) Len() int { return len(v) }
+
+// Swap changes the order of two elements in the list, part of implementing
+// the sort interface.
+func (v VarCollection) Swap(i, j int) { v[i], v[j] = v[j], v[i] }
+
+// Less compares the order of two elements, part of implementing the sort interface.
+// The lower the value of `Prio` the higher the priority.
 func (v VarCollection) Less(i, j int) bool { return v[i].Prio > v[j].Prio }
 
+// Merge consolidates all variables devined in the VarBuckets. Buckets with the
+// heigher priority win.
 func (v *VarCollection) Merge(src string) MergedVars {
 	sort.Sort(v)
 	merged := MergedVars{}
@@ -31,33 +44,45 @@ func (v *VarCollection) Merge(src string) MergedVars {
 				SourceBucket: buck.Name,
 				Distance:     0,
 			}
-			merged.InsertAsNewest(v)
+			merged.insertAsNewest(v)
 		}
 	}
 	return merged
 }
 
-func (v *VarCollection) AddOrReplace(n VarBucket) {
-	for i, vars := range *v {
-		if vars.Name == n.Name {
-			(*v)[i] = n
+// AddOrReplaceBucket adds a VarBucket to a collection. If a bucket with the same
+// name exists, the existing Bucket will be replaced.
+func (v *VarCollection) AddOrReplaceBucket(b VarBucket) {
+	for i, bucket := range *v {
+		if bucket.Name == b.Name {
+			(*v)[i] = b
 			return
 		}
 	}
-	*v = append(*v, n)
+	*v = append(*v, b)
 	return
 }
 
+// Merged holds a key/value representation of a variable as well as some meta data
+// about the variable.
 type Merged struct {
-	Key          string
-	Value        interface{}
-	Source       string
+	// key of the variable
+	Key string
+	// value of the variable
+	Value interface{}
+	// name of the source where name usually represents the name of the role/node containing the VarCollection
+	Source string
+	// bucket name inside the containing VarCollection
 	SourceBucket string
-	Old          *Merged
-	Distance     int
-	Tainting     *Merged
+	// reference to Merged representations of earlier states of the same variable
+	Old *Merged
+	// distance metween the variable origin and the merging element (generally an node)
+	Distance int
+	// if merging is unambiguous, the variable that tries to merge later will be referenced as `tainting`
+	Tainting *Merged
 }
 
+// String implements the `Stringer` interface for debugging reasons
 func (m Merged) String() string {
 	tainting := ""
 	if m.Tainting != nil {
@@ -66,8 +91,10 @@ func (m Merged) String() string {
 	return fmt.Sprintf("Key: `%s`, Value: {%s}, Source: `%s/%s`, Dist: %d%s \n", m.Key, m.Value, m.Source, m.SourceBucket, m.Distance, tainting)
 }
 
+// MergedVars is a list of references to `Merged` elements
 type MergedVars []*Merged
 
+// String implements the `Stringer` interface for debugging reasons
 func (m MergedVars) String() string {
 	var out string
 
@@ -90,7 +117,7 @@ func (m MergedVars) String() string {
 	return out
 }
 
-func (m *MergedVars) InsertAsNewest(v *Merged) {
+func (m *MergedVars) insertAsNewest(v *Merged) {
 	found := false
 	for k, mv := range *m {
 		if mv.Key == v.Key {
@@ -106,7 +133,7 @@ func (m *MergedVars) InsertAsNewest(v *Merged) {
 	}
 }
 
-func (m *MergedVars) InsertNearer(v *Merged) {
+func (m *MergedVars) insertNearestAsNewest(v *Merged) {
 	found := false
 	for k, mv := range *m {
 		if mv.Key == v.Key {
@@ -126,7 +153,7 @@ func (m *MergedVars) InsertNearer(v *Merged) {
 	}
 }
 
-func (m *MergedVars) InsertAsOldest(v *Merged) {
+func (m *MergedVars) insertAsOldest(v *Merged) {
 	inserted := false
 	for _, mv := range *m {
 		if mv.Key == v.Key {
