@@ -156,6 +156,8 @@ var tainting = map[string]bool{
 	"Var 4": false,
 	"Var 5": false,
 	"Var 6": true,
+	"Var 7": false,
+	"Var 8": false,
 }
 
 func TestNodeMerging(t *testing.T) {
