@@ -9,6 +9,8 @@ type Node struct {
 	Roles Roles
 }
 
+// GetVars collects and merges all defined variables that are relevant to a node.
+// In order to have a deterministic way to do so, the following steps are performed
 func (n Node) GetVars() MergedVars {
 	visited := []int{}
 	sort.Sort(n.Roles)
@@ -24,7 +26,8 @@ func (n Node) GetVars() MergedVars {
 			}
 			distance += 1
 			for _, v := range current.Vars.Merge(current.Name) {
-				branch_vars.InsertAsOldest(v.Key, v.Value, v.Source, v.SourceBucket, distance)
+				v.Distance = distance
+				branch_vars.InsertAsOldest(v)
 			}
 			visited = append(visited, current.ID)
 			if current.Parent != nil {
@@ -32,7 +35,6 @@ func (n Node) GetVars() MergedVars {
 			} else {
 				break
 			}
-
 		}
 
 		for _, v := range branch_vars {
@@ -41,7 +43,7 @@ func (n Node) GetVars() MergedVars {
 	}
 
 	for _, v := range n.Vars.Merge("Node") {
-		merged.InsertAsNewest(v.Key, v.Value, v.Source, v.SourceBucket, 0)
+		merged.InsertAsNewest(v)
 	}
 
 	return merged

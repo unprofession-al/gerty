@@ -23,8 +23,15 @@ func (v *VarCollection) Merge(src string) MergedVars {
 	sort.Sort(v)
 	merged := MergedVars{}
 	for _, buck := range *v {
-		for k, v := range buck.Vars {
-			merged.InsertAsNewest(k, v, src, buck.Name, 0)
+		for k, val := range buck.Vars {
+			v := &Merged{
+				Key:          k,
+				Value:        val,
+				Source:       src,
+				SourceBucket: buck.Name,
+				Distance:     0,
+			}
+			merged.InsertAsNewest(v)
 		}
 	}
 	return merged
@@ -83,18 +90,10 @@ func (m MergedVars) String() string {
 	return out
 }
 
-func (m *MergedVars) InsertAsNewest(key string, value interface{}, source string, bucket string, dist int) {
-	v := &Merged{
-		Key:          key,
-		Value:        value,
-		Source:       source,
-		SourceBucket: bucket,
-		Distance:     dist,
-	}
-
+func (m *MergedVars) InsertAsNewest(v *Merged) {
 	found := false
 	for k, mv := range *m {
-		if mv.Key == key {
+		if mv.Key == v.Key {
 			v.Old = mv
 			(*m)[k] = v
 			found = true
@@ -127,18 +126,10 @@ func (m *MergedVars) InsertNearer(v *Merged) {
 	}
 }
 
-func (m *MergedVars) InsertAsOldest(key string, value interface{}, source string, bucket string, dist int) {
-	v := &Merged{
-		Key:          key,
-		Value:        value,
-		Source:       source,
-		SourceBucket: bucket,
-		Distance:     dist,
-	}
-
+func (m *MergedVars) InsertAsOldest(v *Merged) {
 	inserted := false
 	for _, mv := range *m {
-		if mv.Key == key {
+		if mv.Key == v.Key {
 			oldest := mv
 			for true {
 				if oldest.Old != nil {
