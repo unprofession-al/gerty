@@ -10,12 +10,12 @@ install:
   - go get -d ./...
   - go get golang.org/x/tools/cmd/vet
   - go get golang.org/x/tools/cmd/cover
+  - go get github.com/axw/gocov/gocov
   - go get github.com/mattn/goveralls
 #  - go get github.com/golang/lint/golint
 #  - go get github.com/GeertJohan/fgt
 
 script:
-  - echo $PATH
   - go vet ./...
   - go test -v -race ./...
   - $HOME/gopath/bin/goveralls -service=travis-ci
