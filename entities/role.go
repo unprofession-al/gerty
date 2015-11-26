@@ -2,10 +2,17 @@ package entities
 
 import "errors"
 
+type RoleRepository interface {
+	Store(role Role)
+	Delete(role Role)
+	FindByName(name string) Node
+	FindById(id int) Node
+}
+
 // Role holds information and variables as well as position information in the
 // role tree
 type Role struct {
-	ID       int
+	Id       int
 	Name     string
 	Vars     VarCollection
 	Parent   *Role

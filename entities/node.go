@@ -3,9 +3,16 @@ package entities
 
 import "sort"
 
+type NodeRepository interface {
+	Store(node Node)
+	Delete(node Node)
+	FindByName(name string) Node
+	FindById(id int) Node
+}
+
 // Node representes a configuration item (eg. a server, network component etc.).
 type Node struct {
-	ID    int
+	Id    int
 	Name  string
 	Vars  VarCollection
 	Roles Roles
