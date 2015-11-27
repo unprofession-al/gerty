@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"encoding/json"
 	"fmt"
 	"sort"
 )
@@ -61,6 +62,16 @@ func (v *VarCollection) AddOrReplaceBucket(b VarBucket) {
 	}
 	*v = append(*v, b)
 	return
+}
+
+// Serialize renders the colletion as json byte slice
+func (v *VarCollection) Serialize() ([]byte, error) {
+	return json.Marshal(v)
+}
+
+// Deserialize conberts a byte slice to a VarCollection
+func (v *VarCollection) Deserialize(b []byte) error {
+	return json.Unmarshal(b, v)
 }
 
 // Merged holds a key/value representation of a variable as well as some meta data
