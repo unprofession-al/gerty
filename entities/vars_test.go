@@ -40,6 +40,18 @@ var results = map[string]interface{}{
 	"Key 4": "Value G",
 }
 
+func TestVarsSerialize(t *testing.T) {
+	c := VarCollection{}
+	for _, bucket := range tests {
+		c.AddOrReplaceBucket(bucket)
+	}
+	b, err := c.Serialize()
+	if err != nil {
+		t.Error("Could not serialize")
+	}
+	fmt.Println(string(b))
+}
+
 func TestVarsMerge(t *testing.T) {
 	c := VarCollection{}
 	for _, bucket := range tests {

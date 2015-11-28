@@ -6,8 +6,8 @@ import (
 )
 
 func TestRoleAddChildToParent(t *testing.T) {
-	p := Role{Id: 1, Name: "Parent"}
-	c := Role{Id: 2, Name: "Child"}
+	p := Role{Name: "Parent"}
+	c := Role{Name: "Child"}
 
 	err := p.LinkChild(&c)
 	if err != nil {
@@ -16,7 +16,7 @@ func TestRoleAddChildToParent(t *testing.T) {
 
 	childrenAdded := false
 	for _, elem := range p.Children {
-		if elem.Id == c.Id {
+		if elem == &c {
 			childrenAdded = true
 		}
 	}
@@ -24,16 +24,16 @@ func TestRoleAddChildToParent(t *testing.T) {
 		t.Error("child not added to parent")
 	}
 
-	if c.Parent.Id != p.Id {
+	if c.Parent != &p {
 		t.Error("group not refered in child")
 
 	}
 }
 
 func TestRoleCalculateDepth(t *testing.T) {
-	p := Role{Id: 1, Name: "Parent"}
-	c1 := Role{Id: 2, Name: "Child Level 1"}
-	c2 := Role{Id: 3, Name: "Child Level 2"}
+	p := Role{Name: "Parent"}
+	c1 := Role{Name: "Child Level 1"}
+	c2 := Role{Name: "Child Level 2"}
 
 	p.LinkChild(&c1)
 	c1.LinkChild(&c2)
@@ -44,19 +44,19 @@ func TestRoleCalculateDepth(t *testing.T) {
 }
 
 func TestRoleSort(t *testing.T) {
-	p1 := Role{Id: 1, Name: "C Parent 1"}
-	c11 := Role{Id: 2, Name: "C Child 1 Level 1"}
-	c12 := Role{Id: 3, Name: "C Child 1 Level 2"}
+	p1 := Role{Name: "C Parent 1"}
+	c11 := Role{Name: "C Child 1 Level 1"}
+	c12 := Role{Name: "C Child 1 Level 2"}
 	p1.LinkChild(&c11)
 	c11.LinkChild(&c12)
 
-	p2 := Role{Id: 4, Name: "B Parent 2"}
-	c21 := Role{Id: 5, Name: "B Child 2 Level 1"}
+	p2 := Role{Name: "B Parent 2"}
+	c21 := Role{Name: "B Child 2 Level 1"}
 	p2.LinkChild(&c21)
 
-	p3 := Role{Id: 6, Name: "A Parent 3"}
-	c31 := Role{Id: 7, Name: "A Child 3 Level 1"}
-	c32 := Role{Id: 8, Name: "A Child 3 Level 2"}
+	p3 := Role{Name: "A Parent 3"}
+	c31 := Role{Name: "A Child 3 Level 1"}
+	c32 := Role{Name: "A Child 3 Level 2"}
 	p3.LinkChild(&c31)
 	c31.LinkChild(&c32)
 
@@ -79,9 +79,9 @@ func TestRoleSort(t *testing.T) {
 }
 
 func TestRoleCreateCircle(t *testing.T) {
-	p := Role{Id: 1, Name: "Parent"}
-	c1 := Role{Id: 2, Name: "Child Level 1"}
-	c2 := Role{Id: 3, Name: "Child Level 2"}
+	p := Role{Name: "Parent"}
+	c1 := Role{Name: "Child Level 1"}
+	c2 := Role{Name: "Child Level 2"}
 
 	p.LinkChild(&c1)
 	c1.LinkChild(&c2)
@@ -93,9 +93,9 @@ func TestRoleCreateCircle(t *testing.T) {
 }
 
 func TestRoleMultipleParents(t *testing.T) {
-	p1 := Role{Id: 1, Name: "Parent 1"}
-	p2 := Role{Id: 2, Name: "Parent 2"}
-	c := Role{Id: 3, Name: "Child 1"}
+	p1 := Role{Name: "Parent 1"}
+	p2 := Role{Name: "Parent 2"}
+	c := Role{Name: "Child 1"}
 
 	p1.LinkChild(&c)
 
@@ -106,8 +106,8 @@ func TestRoleMultipleParents(t *testing.T) {
 }
 
 func TestRoleDeleteChildFromParent(t *testing.T) {
-	p := Role{Id: 1, Name: "Parent"}
-	c := Role{Id: 2, Name: "Child"}
+	p := Role{Name: "Parent"}
+	c := Role{Name: "Child"}
 
 	p.LinkChild(&c)
 
@@ -117,21 +117,21 @@ func TestRoleDeleteChildFromParent(t *testing.T) {
 	}
 
 	for _, elem := range p.Children {
-		if elem.Id == c.Id {
+		if elem == &c {
 			t.Error("child not removed from parent")
 		}
 	}
 
-	if c.Parent.Id == p.Id {
+	if c.Parent == &p {
 		t.Error("child stil refers to parent")
 
 	}
 }
 
 func TestRoleDeleteUnrelatedChild(t *testing.T) {
-	p := Role{Id: 1, Name: "Parent"}
-	c1 := Role{Id: 2, Name: "Child 1"}
-	c2 := Role{Id: 3, Name: "Child 2"}
+	p := Role{Name: "Parent"}
+	c1 := Role{Name: "Child 1"}
+	c2 := Role{Name: "Child 2"}
 
 	p.LinkChild(&c1)
 	err := p.UnlinkChild(&c2)

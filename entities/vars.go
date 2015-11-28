@@ -11,9 +11,9 @@ type VarList map[string]interface{}
 
 // VarBucket adds a name and a priority to a VarList.
 type VarBucket struct {
-	Name string
-	Prio int // lower value means higher priority
-	Vars VarList
+	Name string  `json:"name"`
+	Prio int     `json:"prio"` // lower value means higher priority
+	Vars VarList `json:"vars"`
 }
 
 // VarCollection groups together multiple VarBuckets. This entity is
