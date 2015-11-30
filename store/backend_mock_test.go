@@ -11,14 +11,14 @@ var store Store
 
 func TestMain(m *testing.M) {
 	roleMockData := map[int64]*RoleMock{
-		1: &RoleMock{Name: "ra", Vars: "[{\"name\":\"Bucket 1\",\"prio\":1,\"vars\":{\"key_1\": \"val_a\"}}]", Children: []int64{2, 3}},
-		2: &RoleMock{Name: "rb"},
-		3: &RoleMock{Name: "rc"},
+		1: {Name: "ra", Vars: "[{\"name\":\"Bucket 1\",\"prio\":1,\"vars\":{\"key_1\": \"val_a\"}}]", Children: []int64{2, 3}},
+		2: {Name: "rb"},
+		3: {Name: "rc"},
 	}
 	roleBackendMock := NewRoleBackendMock(roleMockData)
 
 	nodeMockData := []*NodeMock{
-		&NodeMock{Name: "Node 1", Vars: "[{\"name\":\"Bucket X\",\"prio\":1,\"vars\":{\"key_1\": \"val_node\"}}]", Roles: []int64{2, 3}},
+		{Name: "Node 1", Vars: "[{\"name\":\"Bucket X\",\"prio\":1,\"vars\":{\"key_1\": \"val_node\"}}]", Roles: []int64{2, 3}},
 	}
 	nodeBackendMock := NewNodeBackendMock(nodeMockData, &roleBackendMock)
 
