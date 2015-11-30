@@ -68,7 +68,15 @@ func TestSaveToNodeMock(t *testing.T) {
 	test := entities.Node{
 		Name:  name,
 		Roles: entities.Roles{&role},
-		Vars:  entities.VarCollection{},
+		Vars: entities.VarCollection{
+			entities.VarBucket{
+				Prio: 1,
+				Name: "host_bucket_1",
+				Vars: entities.VarList{
+					"host_var_1": "HOST",
+				},
+			},
+		},
 	}
 	store.Nodes.Save(test)
 
