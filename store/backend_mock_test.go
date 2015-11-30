@@ -64,19 +64,13 @@ func TestGetNotExistingNode(t *testing.T) {
 func TestSaveToNodeMock(t *testing.T) {
 	name := "Test Node"
 	role, _ := store.Roles.Get("rc")
+	roles := entities.Roles{}
+	roles = append(roles, &role)
 
 	test := entities.Node{
 		Name:  name,
-		Roles: entities.Roles{&role},
-		Vars: entities.VarCollection{
-			entities.VarBucket{
-				Prio: 1,
-				Name: "host_bucket_1",
-				Vars: entities.VarList{
-					"host_var_1": "HOST",
-				},
-			},
-		},
+		Roles: roles,
+		Vars:  entities.VarCollection{},
 	}
 	store.Nodes.Save(test)
 
