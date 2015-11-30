@@ -23,7 +23,7 @@ rg     rh
 */
 
 var r = map[string]*Role{
-	"a": &Role{
+	"a": {
 		Name: "ra",
 		Vars: VarCollection{
 			VarBucket{
@@ -41,7 +41,7 @@ var r = map[string]*Role{
 			},
 		},
 	},
-	"b": &Role{
+	"b": {
 		Name: "rb",
 		Vars: VarCollection{
 			VarBucket{
@@ -53,7 +53,7 @@ var r = map[string]*Role{
 			},
 		},
 	},
-	"c": &Role{
+	"c": {
 		Name: "rc",
 		Vars: VarCollection{
 			VarBucket{
@@ -66,7 +66,7 @@ var r = map[string]*Role{
 			},
 		},
 	},
-	"d": &Role{
+	"d": {
 		Name: "rd",
 		Vars: VarCollection{
 			VarBucket{
@@ -78,7 +78,7 @@ var r = map[string]*Role{
 			},
 		},
 	},
-	"e": &Role{
+	"e": {
 		Name: "re",
 		Vars: VarCollection{
 			VarBucket{
@@ -91,7 +91,7 @@ var r = map[string]*Role{
 			},
 		},
 	},
-	"f": &Role{
+	"f": {
 		Name: "rf",
 		Vars: VarCollection{
 			VarBucket{
@@ -104,7 +104,7 @@ var r = map[string]*Role{
 			},
 		},
 	},
-	"g": &Role{
+	"g": {
 		Name: "rg",
 		Vars: VarCollection{
 			VarBucket{
@@ -116,7 +116,7 @@ var r = map[string]*Role{
 			},
 		},
 	},
-	"h": &Role{
+	"h": {
 		Name: "rh",
 		Vars: VarCollection{
 			VarBucket{
