@@ -1,0 +1,8 @@
+{
+	"ImportPath": "github.com/unprofession-al/gerty",
+	"GoVersion": "go1.5.1",
+	"Packages": [
+		"./..."
+	],
+	"Deps": []
+}
