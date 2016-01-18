@@ -8,6 +8,6 @@ func NewRouter() *mux.Router {
 
 	nodes := api.PathPrefix("/nodes").Subrouter()
 
-	nodes.HandleFunc("/", ListNodes).Methods("GET")
+	nodes.HandleFunc("/", listNodes).Methods("GET")
 	return r
 }
