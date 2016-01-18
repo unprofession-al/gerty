@@ -34,7 +34,7 @@ type Node struct {
 // 5) Node variables will be merged with the consolideted role variables. Node
 // always win.
 func (n Node) GetVars() MergedVars {
-	visited := []*Role{}
+	visited := []string{}
 	sort.Sort(n.Roles)
 	merged := MergedVars{}
 
@@ -43,7 +43,7 @@ func (n Node) GetVars() MergedVars {
 		distance := 0
 		current := role
 		for true {
-			if contains(visited, current) {
+			if contains(visited, current.Name) {
 				break
 			}
 			distance++
@@ -51,7 +51,7 @@ func (n Node) GetVars() MergedVars {
 				v.Distance = distance
 				branchVars.insertAsOldest(v)
 			}
-			visited = append(visited, current)
+			visited = append(visited, current.Name)
 			if current.GetParent() != nil {
 				current = current.GetParent()
 			} else {
@@ -72,7 +72,7 @@ func (n Node) GetVars() MergedVars {
 
 }
 
-func contains(roles []*Role, r *Role) bool {
+func contains(roles []string, r string) bool {
 	for _, role := range roles {
 		if role == r {
 			return true
