@@ -2,44 +2,70 @@ package entities
 
 import "errors"
 
+type RoleStore interface {
+	Save(r Role) error
+	Delete(r Role) error
+	Get(name string) (Role, error)
+}
+
+type RoleInteractor struct {
+	RoleStore
+}
+
+func NewRoleInteractor(roles RoleStore) RoleInteractor {
+	return RoleInteractor{RoleStore: roles}
+}
+
 // Role holds information and variables as well as position information in the
 // role tree
 type Role struct {
 	Name     string
 	Vars     VarCollection
-	Parent   *Role
-	Children Roles
+	Parent   string
+	Children []string
 }
 
 // LinkChild adds a given role to the current roles children.
-func (role *Role) LinkChild(child *Role) error {
-	if role.checkCircularReflexion(child) {
+func (ri RoleInteractor) LinkChild(role *Role, child *Role) error {
+	if ri.checkCircularReflexion(*role, *child) {
 		return errors.New("cannot add, this would create a circular reflection")
 	}
-	if child.Parent != nil {
+	if child.Parent != "" {
 		return errors.New("child already has parent")
 	}
-	role.Children = append(role.Children, child)
-	child.Parent = role
+	role.Children = append(role.Children, child.Name)
+	ri.Save(*role)
+	child.Parent = role.Name
+	ri.Save(*child)
 	return nil
 }
 
-func (role *Role) checkCircularReflexion(child *Role) bool {
-	for _, c := range child.Children {
-		if c == role {
+func (ri RoleInteractor) checkCircularReflexion(role Role, child Role) bool {
+	for _, cName := range child.Children {
+		c, err := ri.Get(cName)
+		if err != nil {
+			panic(err)
+		}
+		if c.Name == role.Name {
 			return true
 		}
-		return role.checkCircularReflexion(c)
+		return ri.checkCircularReflexion(role, c)
 	}
 	return false
 }
 
 // UnlinkChild removes a given role from the current roles children.
-func (role *Role) UnlinkChild(child *Role) error {
-	for i, c := range role.Children {
-		if c == child {
-			child.Parent = &Role{}
+func (ri RoleInteractor) UnlinkChild(role *Role, child *Role) error {
+	for i, cName := range role.Children {
+		c, err := ri.Get(cName)
+		if err != nil {
+			return err
+		}
+		if c.Name == child.Name {
+			child.Parent = ""
+			ri.Save(*child)
 			role.Children = append(role.Children[:i], role.Children[i+1:]...)
+			ri.Save(*role)
 			return nil
 		}
 	}
@@ -47,12 +73,16 @@ func (role *Role) UnlinkChild(child *Role) error {
 }
 
 // Depth calculates the distance of the role to the root of the tree.
-func (role *Role) Depth() int {
+func (ri RoleInteractor) Depth(role Role) int {
 	depth := 0
 	r := role
 	for true {
-		if r.GetParent() != nil {
-			r = r.GetParent()
+		if r.Parent != "" {
+			nr, err := ri.Get(r.Parent)
+			if err != nil {
+				panic(err)
+			}
+			r = nr
 			depth++
 		} else {
 			break
@@ -62,33 +92,50 @@ func (role *Role) Depth() int {
 	return depth
 }
 
-// GetParent returns the parent role
-func (role *Role) GetParent() *Role {
-	if role.Parent != nil {
-		return role.Parent
+/*
+func (ri RoleInteractor) SortChildern(role *Role) {
+	rs := RoleSorter{
+		Roles: role.Children,
+		ri:    ri,
 	}
-	return nil
+
+	sort.Sort(rs)
+	role.Children = rs.Roles
 }
+*/
 
 // Roles is a list of references to `Role` elements
-type Roles []*Role
+type roleSorter struct {
+	Roles []string
+	ri    RoleInteractor
+}
 
 // Len returns the lenght of the list, part of implementing the sort interface.
-func (r Roles) Len() int { return len(r) }
+func (r roleSorter) Len() int { return len(r.Roles) }
 
 // Swap changes the order of two elements in the list, part of implementing
 // the sort interface.
-func (r Roles) Swap(i, j int) { r[i], r[j] = r[j], r[i] }
+func (r roleSorter) Swap(i, j int) { r.Roles[i], r.Roles[j] = r.Roles[j], r.Roles[i] }
 
 // Less compares the order of two elements, part of implementing the sort interface.
 // The heigher the depht (distance to root element of the tree), the earlier the
 // element appears in the the order. Roles with the same depth will be sorted
 // alphabetically.
-func (r Roles) Less(i, j int) bool {
-	iDepth := r[i].Depth()
-	jDepth := r[j].Depth()
+func (r roleSorter) Less(i, j int) bool {
+	iRole, err := r.ri.Get(r.Roles[i])
+	if err != nil {
+		panic(err)
+	}
+	iDepth := r.ri.Depth(iRole)
+
+	jRole, err := r.ri.Get(r.Roles[j])
+	if err != nil {
+		panic(err)
+	}
+	jDepth := r.ri.Depth(jRole)
+
 	if iDepth == jDepth {
-		return r[i].Name < r[j].Name
+		return iRole.Name < jRole.Name
 	}
 	return iDepth > jDepth
 }

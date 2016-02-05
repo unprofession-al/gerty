@@ -1,9 +1,47 @@
 package entities
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 )
+
+type NodeStoreImpl struct {
+	nodes map[string]Node
+}
+
+func (nsi NodeStoreImpl) Save(n Node) error {
+	nsi.nodes[n.Name] = n
+	return nil
+}
+
+func (nsi NodeStoreImpl) Delete(n Node) error {
+	delete(nsi.nodes, n.Name)
+	return nil
+}
+
+func (nsi NodeStoreImpl) Get(name string) (Node, error) {
+	node, ok := nsi.nodes[name]
+	if !ok {
+		return node, errors.New("Node does not exist")
+	}
+	return node, nil
+}
+
+func TestNodeInteractor(t *testing.T) {
+	newNode := Node{Name: "TestNode"}
+
+	ri := NewRoleInteractor(RoleStoreImpl{roles: make(map[string]Role)})
+	ni := NewNodeInteractor(NodeStoreImpl{nodes: make(map[string]Node)}, ri)
+
+	ni.Save(newNode)
+
+	node, _ := ni.Get(newNode.Name)
+
+	if node.Name != newNode.Name {
+		t.Errorf("Name in not consistent: `%s` != '%s'", node.Name, newNode.Name)
+	}
+}
 
 /*
 	           ra
@@ -15,7 +53,6 @@ import (
     +---+---+       +---+
     |       |       |
    rd       re      rf
-
     |
 +---+---+
 |       |
@@ -153,17 +190,25 @@ var tainting = map[string]bool{
 }
 
 func TestNodeMerging(t *testing.T) {
-	r["a"].LinkChild(r["b"])
-	r["a"].LinkChild(r["c"])
-	r["b"].LinkChild(r["d"])
-	r["b"].LinkChild(r["e"])
-	r["c"].LinkChild(r["f"])
-	r["d"].LinkChild(r["g"])
-	r["d"].LinkChild(r["h"])
+	ri := NewRoleInteractor(RoleStoreImpl{roles: make(map[string]Role)})
+	for _, role := range r {
+		ri.Save(*role)
+	}
 
+	ri.LinkChild(r["a"], r["b"])
+	ri.LinkChild(r["a"], r["c"])
+	ri.LinkChild(r["b"], r["d"])
+	ri.LinkChild(r["b"], r["e"])
+	ri.LinkChild(r["c"], r["f"])
+	ri.LinkChild(r["d"], r["g"])
+	ri.LinkChild(r["d"], r["h"])
+
+	ni := NewNodeInteractor(NodeStoreImpl{nodes: make(map[string]Node)}, ri)
+
+	roles := []string{r["g"].Name, r["h"].Name, r["e"].Name, r["f"].Name, r["c"].Name}
 	node := Node{
 		Name:  "Test",
-		Roles: Roles{r["g"], r["h"], r["e"], r["f"], r["c"]},
+		Roles: roles,
 		Vars: VarCollection{
 			VarBucket{
 				Prio: 1,
@@ -175,7 +220,9 @@ func TestNodeMerging(t *testing.T) {
 		},
 	}
 
-	vars := node.GetVars()
+	ni.Save(node)
+
+	vars := ni.GetVars(node)
 	fmt.Println(vars)
 	for rk, rv := range nodeResults {
 		found := false

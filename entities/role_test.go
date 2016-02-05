@@ -1,22 +1,67 @@
 package entities
 
 import (
+	"errors"
 	"sort"
 	"testing"
 )
 
-func TestRoleAddChildToParent(t *testing.T) {
-	p := Role{Name: "Parent"}
-	c := Role{Name: "Child"}
+type RoleStoreImpl struct {
+	roles map[string]Role
+}
 
-	err := p.LinkChild(&c)
+func (rsi RoleStoreImpl) Save(r Role) error {
+	rsi.roles[r.Name] = r
+	return nil
+}
+
+func (rsi RoleStoreImpl) Delete(r Role) error {
+	delete(rsi.roles, r.Name)
+	return nil
+}
+
+func (rsi RoleStoreImpl) Get(name string) (Role, error) {
+	role, ok := rsi.roles[name]
+	if !ok {
+		return role, errors.New("Role does not exist")
+	}
+	return role, nil
+}
+
+func TestRoleInteractor(t *testing.T) {
+	newRole := Role{Name: "TestRole"}
+
+	ri := NewRoleInteractor(RoleStoreImpl{roles: make(map[string]Role)})
+
+	ri.Save(newRole)
+
+	role, _ := ri.Get(newRole.Name)
+
+	if role.Name != newRole.Name {
+		t.Errorf("Name in not consistent: `%s` != '%s'", role.Name, newRole.Name)
+	}
+}
+
+func TestRoleAddChildToParent(t *testing.T) {
+	ri := NewRoleInteractor(RoleStoreImpl{roles: make(map[string]Role)})
+
+	p := Role{Name: "Parent"}
+	ri.Save(p)
+
+	c := Role{Name: "Child"}
+	ri.Save(c)
+
+	err := ri.LinkChild(&p, &c)
 	if err != nil {
 		t.Error("child not added to parent")
 	}
 
+	p, _ = ri.Get(p.Name)
+	c, _ = ri.Get(c.Name)
+
 	childrenAdded := false
 	for _, elem := range p.Children {
-		if elem == &c {
+		if elem == c.Name {
 			childrenAdded = true
 		}
 	}
@@ -24,41 +69,146 @@ func TestRoleAddChildToParent(t *testing.T) {
 		t.Error("child not added to parent")
 	}
 
-	if c.Parent != &p {
+	if c.Parent != p.Name {
 		t.Error("group not refered in child")
 
 	}
 }
 
-func TestRoleCalculateDepth(t *testing.T) {
+func TestRoleCreateCircle(t *testing.T) {
+	ri := NewRoleInteractor(RoleStoreImpl{roles: make(map[string]Role)})
+
 	p := Role{Name: "Parent"}
+	ri.Save(p)
+
 	c1 := Role{Name: "Child Level 1"}
+	ri.Save(c1)
+
 	c2 := Role{Name: "Child Level 2"}
+	ri.Save(c2)
 
-	p.LinkChild(&c1)
-	c1.LinkChild(&c2)
+	ri.LinkChild(&p, &c1)
+	ri.LinkChild(&c1, &c2)
 
-	if c2.Depth() != 2 {
+	err := ri.LinkChild(&c2, &p)
+	if err == nil {
+		t.Error("circular reflecton created")
+	}
+}
+
+func TestRoleMultipleParents(t *testing.T) {
+	ri := NewRoleInteractor(RoleStoreImpl{roles: make(map[string]Role)})
+
+	p1 := Role{Name: "Parent 1"}
+	ri.Save(p1)
+
+	p2 := Role{Name: "Parent 2"}
+	ri.Save(p2)
+
+	c := Role{Name: "Child 1"}
+	ri.Save(c)
+
+	ri.LinkChild(&p1, &c)
+
+	err := ri.LinkChild(&p2, &c)
+	if err == nil {
+		t.Error("child with parent added to new parent")
+	}
+}
+
+func TestRoleDeleteChildFromParent(t *testing.T) {
+	ri := NewRoleInteractor(RoleStoreImpl{roles: make(map[string]Role)})
+
+	p := Role{Name: "Parent"}
+	ri.Save(p)
+
+	c := Role{Name: "Child"}
+	ri.Save(c)
+
+	ri.LinkChild(&p, &c)
+
+	err := ri.UnlinkChild(&p, &c)
+	if err != nil {
+		t.Error("child not deleted from parent")
+	}
+
+	for _, elem := range p.Children {
+		if elem == c.Name {
+			t.Error("child not removed from parent")
+		}
+	}
+
+	if c.Parent == p.Name {
+		t.Error("child stil refers to parent")
+
+	}
+}
+
+func TestRoleDeleteUnrelatedChild(t *testing.T) {
+	ri := NewRoleInteractor(RoleStoreImpl{roles: make(map[string]Role)})
+
+	p := Role{Name: "Parent"}
+	ri.Save(p)
+
+	c1 := Role{Name: "Child Level 1"}
+	ri.Save(c1)
+
+	c2 := Role{Name: "Child Level 2"}
+	ri.Save(c2)
+
+	ri.LinkChild(&p, &c1)
+	err := ri.UnlinkChild(&p, &c2)
+	if err == nil {
+		t.Error("removing a node from another node that is not related as parent shuld be impossible")
+	}
+}
+
+func TestRoleCalculateDepth(t *testing.T) {
+	ri := NewRoleInteractor(RoleStoreImpl{roles: make(map[string]Role)})
+
+	p := Role{Name: "Parent"}
+	ri.Save(p)
+
+	c1 := Role{Name: "Child Level 1"}
+	ri.Save(c1)
+
+	c2 := Role{Name: "Child Level 2"}
+	ri.Save(c2)
+
+	ri.LinkChild(&p, &c1)
+	ri.LinkChild(&c1, &c2)
+
+	if ri.Depth(c2) != 2 {
 		t.Error("depth not calculated correctly")
 	}
 }
 
 func TestRoleSort(t *testing.T) {
+	ri := NewRoleInteractor(RoleStoreImpl{roles: make(map[string]Role)})
+
 	p1 := Role{Name: "C Parent 1"}
+	ri.Save(p1)
 	c11 := Role{Name: "C Child 1 Level 1"}
+	ri.Save(c11)
 	c12 := Role{Name: "C Child 1 Level 2"}
-	p1.LinkChild(&c11)
-	c11.LinkChild(&c12)
+	ri.Save(c12)
+	ri.LinkChild(&p1, &c11)
+	ri.LinkChild(&c11, &c12)
 
 	p2 := Role{Name: "B Parent 2"}
+	ri.Save(p2)
 	c21 := Role{Name: "B Child 2 Level 1"}
-	p2.LinkChild(&c21)
+	ri.Save(c21)
+	ri.LinkChild(&p2, &c21)
 
 	p3 := Role{Name: "A Parent 3"}
+	ri.Save(p3)
 	c31 := Role{Name: "A Child 3 Level 1"}
+	ri.Save(c31)
 	c32 := Role{Name: "A Child 3 Level 2"}
-	p3.LinkChild(&c31)
-	c31.LinkChild(&c32)
+	ri.Save(c32)
+	ri.LinkChild(&p3, &c31)
+	ri.LinkChild(&c31, &c32)
 
 	expected := map[int]string{
 		0: "A Child 3 Level 2",
@@ -66,76 +216,17 @@ func TestRoleSort(t *testing.T) {
 		2: "B Child 2 Level 1",
 	}
 
-	roles := Roles{&c12, &c21, &c32}
-	sort.Sort(roles)
+	roles := []string{c12.Name, c21.Name, c32.Name}
+	rs := roleSorter{
+		Roles: roles,
+		ri:    ri,
+	}
 
-	for k, v := range roles {
-		if expected[k] != v.Name {
-			t.Errorf("`%s` is at position %d, should be `%s`", v.Name, k, expected[k])
+	sort.Sort(rs)
 
+	for k, v := range rs.Roles {
+		if expected[k] != v {
+			t.Errorf("`%s` is at position %d, should be `%s`", v, k, expected[k])
 		}
-	}
-
-}
-
-func TestRoleCreateCircle(t *testing.T) {
-	p := Role{Name: "Parent"}
-	c1 := Role{Name: "Child Level 1"}
-	c2 := Role{Name: "Child Level 2"}
-
-	p.LinkChild(&c1)
-	c1.LinkChild(&c2)
-
-	err := c2.LinkChild(&p)
-	if err == nil {
-		t.Error("circular reflecton created")
-	}
-}
-
-func TestRoleMultipleParents(t *testing.T) {
-	p1 := Role{Name: "Parent 1"}
-	p2 := Role{Name: "Parent 2"}
-	c := Role{Name: "Child 1"}
-
-	p1.LinkChild(&c)
-
-	err := p2.LinkChild(&c)
-	if err == nil {
-		t.Error("child with parent added to new parent")
-	}
-}
-
-func TestRoleDeleteChildFromParent(t *testing.T) {
-	p := Role{Name: "Parent"}
-	c := Role{Name: "Child"}
-
-	p.LinkChild(&c)
-
-	err := p.UnlinkChild(&c)
-	if err != nil {
-		t.Error("child not deleted from parent")
-	}
-
-	for _, elem := range p.Children {
-		if elem == &c {
-			t.Error("child not removed from parent")
-		}
-	}
-
-	if c.Parent == &p {
-		t.Error("child stil refers to parent")
-
-	}
-}
-
-func TestRoleDeleteUnrelatedChild(t *testing.T) {
-	p := Role{Name: "Parent"}
-	c1 := Role{Name: "Child 1"}
-	c2 := Role{Name: "Child 2"}
-
-	p.LinkChild(&c1)
-	err := p.UnlinkChild(&c2)
-	if err == nil {
-		t.Error("removing a node from another node that is not related as parent shuld be impossible")
 	}
 }

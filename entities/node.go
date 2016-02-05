@@ -7,7 +7,25 @@ import "sort"
 type Node struct {
 	Name  string
 	Vars  VarCollection
-	Roles Roles
+	Roles []string
+}
+
+type NodeStore interface {
+	Save(n Node) error
+	Delete(n Node) error
+	Get(name string) (Node, error)
+}
+
+type NodeInteractor struct {
+	NodeStore
+	roles RoleInteractor
+}
+
+func NewNodeInteractor(nodes NodeStore, roles RoleInteractor) NodeInteractor {
+	return NodeInteractor{
+		NodeStore: nodes,
+		roles:     roles,
+	}
 }
 
 // GetVars collects and merges all defined variables that are relevant to a node.
@@ -33,12 +51,22 @@ type Node struct {
 //
 // 5) Node variables will be merged with the consolideted role variables. Node
 // always win.
-func (n Node) GetVars() MergedVars {
+func (ni NodeInteractor) GetVars(n Node) MergedVars {
 	visited := []string{}
-	sort.Sort(n.Roles)
+
+	rs := roleSorter{
+		Roles: n.Roles,
+		ri:    ni.roles,
+	}
+
+	sort.Sort(rs)
 	merged := MergedVars{}
 
-	for _, role := range n.Roles {
+	for _, rName := range rs.Roles {
+		role, err := ni.roles.Get(rName)
+		if err != nil {
+			panic(err)
+		}
 		branchVars := MergedVars{}
 		distance := 0
 		current := role
@@ -52,8 +80,12 @@ func (n Node) GetVars() MergedVars {
 				branchVars.insertAsOldest(v)
 			}
 			visited = append(visited, current.Name)
-			if current.GetParent() != nil {
-				current = current.GetParent()
+			if current.Parent != "" {
+				cur, err := ni.roles.Get(current.Parent)
+				if err != nil {
+					panic(err)
+				}
+				current = cur
 			} else {
 				break
 			}
