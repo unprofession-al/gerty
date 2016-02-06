@@ -97,7 +97,7 @@ type roleSorter struct {
 	ri    RoleInteractor
 }
 
-// Len returns the lenght of the list, part of implementing the sort interface.
+// Len returns the length of the list, part of implementing the sort interface.
 func (r roleSorter) Len() int { return len(r.Roles) }
 
 // Swap changes the order of two elements in the list, part of implementing
@@ -105,7 +105,7 @@ func (r roleSorter) Len() int { return len(r.Roles) }
 func (r roleSorter) Swap(i, j int) { r.Roles[i], r.Roles[j] = r.Roles[j], r.Roles[i] }
 
 // Less compares the order of two elements, part of implementing the sort interface.
-// The heigher the depht (distance to root element of the tree), the earlier the
+// The higher the depht (distance to root element of the tree), the earlier the
 // element appears in the the order. Roles with the same depth will be sorted
 // alphabetically.
 func (r roleSorter) Less(i, j int) bool {

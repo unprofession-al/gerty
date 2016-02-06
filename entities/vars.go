@@ -20,7 +20,7 @@ type VarBucket struct {
 // referenced by nodes and roles.
 type VarCollection []VarBucket
 
-// Len returns the lenght of the list, part of implementing the sort interface.
+// Len returns the length of the list, part of implementing the sort interface.
 func (v VarCollection) Len() int { return len(v) }
 
 // Swap changes the order of two elements in the list, part of implementing
@@ -32,7 +32,7 @@ func (v VarCollection) Swap(i, j int) { v[i], v[j] = v[j], v[i] }
 func (v VarCollection) Less(i, j int) bool { return v[i].Prio > v[j].Prio }
 
 // Merge consolidates all variables devined in the VarBuckets. Buckets with the
-// heigher priority win.
+// higher priority win.
 func (v *VarCollection) Merge(src string) MergedVars {
 	sort.Sort(v)
 	merged := MergedVars{}
