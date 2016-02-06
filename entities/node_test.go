@@ -1,38 +1,15 @@
 package entities
 
 import (
-	"errors"
 	"fmt"
 	"testing"
 )
 
-type NodeStoreImpl struct {
-	nodes map[string]Node
-}
-
-func (nsi NodeStoreImpl) Save(n Node) error {
-	nsi.nodes[n.Name] = n
-	return nil
-}
-
-func (nsi NodeStoreImpl) Delete(n Node) error {
-	delete(nsi.nodes, n.Name)
-	return nil
-}
-
-func (nsi NodeStoreImpl) Get(name string) (Node, error) {
-	node, ok := nsi.nodes[name]
-	if !ok {
-		return node, errors.New("Node does not exist")
-	}
-	return node, nil
-}
-
 func TestNodeInteractor(t *testing.T) {
 	newNode := Node{Name: "TestNode"}
 
-	ri := NewRoleInteractor(RoleStoreImpl{roles: make(map[string]Role)})
-	ni := NewNodeInteractor(NodeStoreImpl{nodes: make(map[string]Node)}, ri)
+	ri := NewRoleInteractor(RoleStoreMock{roles: make(map[string]Role)})
+	ni := NewNodeInteractor(NodeStoreMock{nodes: make(map[string]Node)}, ri)
 
 	ni.Save(newNode)
 
@@ -190,7 +167,7 @@ var tainting = map[string]bool{
 }
 
 func TestNodeMerging(t *testing.T) {
-	ri := NewRoleInteractor(RoleStoreImpl{roles: make(map[string]Role)})
+	ri := NewRoleInteractor(RoleStoreMock{roles: make(map[string]Role)})
 	for _, role := range r {
 		ri.Save(*role)
 	}
@@ -203,7 +180,7 @@ func TestNodeMerging(t *testing.T) {
 	ri.LinkChild(r["d"], r["g"])
 	ri.LinkChild(r["d"], r["h"])
 
-	ni := NewNodeInteractor(NodeStoreImpl{nodes: make(map[string]Node)}, ri)
+	ni := NewNodeInteractor(NodeStoreMock{nodes: make(map[string]Node)}, ri)
 
 	roles := []string{r["g"].Name, r["h"].Name, r["e"].Name, r["f"].Name, r["c"].Name}
 	node := Node{

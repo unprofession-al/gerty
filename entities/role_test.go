@@ -1,37 +1,14 @@
 package entities
 
 import (
-	"errors"
 	"sort"
 	"testing"
 )
 
-type RoleStoreImpl struct {
-	roles map[string]Role
-}
-
-func (rsi RoleStoreImpl) Save(r Role) error {
-	rsi.roles[r.Name] = r
-	return nil
-}
-
-func (rsi RoleStoreImpl) Delete(r Role) error {
-	delete(rsi.roles, r.Name)
-	return nil
-}
-
-func (rsi RoleStoreImpl) Get(name string) (Role, error) {
-	role, ok := rsi.roles[name]
-	if !ok {
-		return role, errors.New("Role does not exist")
-	}
-	return role, nil
-}
-
 func TestRoleInteractor(t *testing.T) {
 	newRole := Role{Name: "TestRole"}
 
-	ri := NewRoleInteractor(RoleStoreImpl{roles: make(map[string]Role)})
+	ri := NewRoleInteractor(RoleStoreMock{roles: make(map[string]Role)})
 
 	ri.Save(newRole)
 
@@ -43,7 +20,7 @@ func TestRoleInteractor(t *testing.T) {
 }
 
 func TestRoleAddChildToParent(t *testing.T) {
-	ri := NewRoleInteractor(RoleStoreImpl{roles: make(map[string]Role)})
+	ri := NewRoleInteractor(RoleStoreMock{roles: make(map[string]Role)})
 
 	p := Role{Name: "Parent"}
 	ri.Save(p)
@@ -76,7 +53,7 @@ func TestRoleAddChildToParent(t *testing.T) {
 }
 
 func TestRoleCreateCircle(t *testing.T) {
-	ri := NewRoleInteractor(RoleStoreImpl{roles: make(map[string]Role)})
+	ri := NewRoleInteractor(RoleStoreMock{roles: make(map[string]Role)})
 
 	p := Role{Name: "Parent"}
 	ri.Save(p)
@@ -97,7 +74,7 @@ func TestRoleCreateCircle(t *testing.T) {
 }
 
 func TestRoleMultipleParents(t *testing.T) {
-	ri := NewRoleInteractor(RoleStoreImpl{roles: make(map[string]Role)})
+	ri := NewRoleInteractor(RoleStoreMock{roles: make(map[string]Role)})
 
 	p1 := Role{Name: "Parent 1"}
 	ri.Save(p1)
@@ -117,7 +94,7 @@ func TestRoleMultipleParents(t *testing.T) {
 }
 
 func TestRoleDeleteChildFromParent(t *testing.T) {
-	ri := NewRoleInteractor(RoleStoreImpl{roles: make(map[string]Role)})
+	ri := NewRoleInteractor(RoleStoreMock{roles: make(map[string]Role)})
 
 	p := Role{Name: "Parent"}
 	ri.Save(p)
@@ -145,7 +122,7 @@ func TestRoleDeleteChildFromParent(t *testing.T) {
 }
 
 func TestRoleDeleteUnrelatedChild(t *testing.T) {
-	ri := NewRoleInteractor(RoleStoreImpl{roles: make(map[string]Role)})
+	ri := NewRoleInteractor(RoleStoreMock{roles: make(map[string]Role)})
 
 	p := Role{Name: "Parent"}
 	ri.Save(p)
@@ -164,7 +141,7 @@ func TestRoleDeleteUnrelatedChild(t *testing.T) {
 }
 
 func TestRoleCalculateDepth(t *testing.T) {
-	ri := NewRoleInteractor(RoleStoreImpl{roles: make(map[string]Role)})
+	ri := NewRoleInteractor(RoleStoreMock{roles: make(map[string]Role)})
 
 	p := Role{Name: "Parent"}
 	ri.Save(p)
@@ -184,7 +161,7 @@ func TestRoleCalculateDepth(t *testing.T) {
 }
 
 func TestRoleSort(t *testing.T) {
-	ri := NewRoleInteractor(RoleStoreImpl{roles: make(map[string]Role)})
+	ri := NewRoleInteractor(RoleStoreMock{roles: make(map[string]Role)})
 
 	p1 := Role{Name: "C Parent 1"}
 	ri.Save(p1)
