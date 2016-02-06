@@ -88,21 +88,8 @@ func (ri RoleInteractor) Depth(role Role) int {
 			break
 		}
 	}
-
 	return depth
 }
-
-/*
-func (ri RoleInteractor) SortChildern(role *Role) {
-	rs := RoleSorter{
-		Roles: role.Children,
-		ri:    ri,
-	}
-
-	sort.Sort(rs)
-	role.Children = rs.Roles
-}
-*/
 
 // Roles is a list of references to `Role` elements
 type roleSorter struct {
