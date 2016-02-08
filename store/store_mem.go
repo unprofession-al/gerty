@@ -28,6 +28,14 @@ func (ns NodeStoreMem) Get(name string) (entities.Node, error) {
 	return node, nil
 }
 
+func (ns NodeStoreMem) List() []string {
+	out := []string{}
+	for name, _ := range ns.nodes {
+		out = append(out, name)
+	}
+	return out
+}
+
 type RoleStoreMem struct {
 	roles map[string]entities.Role
 }
@@ -48,4 +56,12 @@ func (rs RoleStoreMem) Get(name string) (entities.Role, error) {
 		return role, errors.New("Role does not exist")
 	}
 	return role, nil
+}
+
+func (rs RoleStoreMem) List() []string {
+	out := []string{}
+	for name, _ := range rs.roles {
+		out = append(out, name)
+	}
+	return out
 }

@@ -20,6 +20,25 @@ func TestNodeInteractor(t *testing.T) {
 	}
 }
 
+func TestListNodes(t *testing.T) {
+	node1 := Node{Name: "Node 1"}
+	node2 := Node{Name: "Node 2"}
+	node3 := Node{Name: "Node 3"}
+
+	ri := NewRoleInteractor(RoleStoreMock{roles: make(map[string]Role)})
+	ni := NewNodeInteractor(NodeStoreMock{nodes: make(map[string]Node)}, ri)
+
+	ni.Save(node1)
+	ni.Save(node2)
+	ni.Save(node3)
+
+	nodeList := ni.List()
+
+	if len(nodeList) != 3 {
+		t.Errorf("Wrong number of nodes found: `%d` != '%d'", len(nodeList), 3)
+	}
+}
+
 /*
 	           ra
                 |

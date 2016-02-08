@@ -14,6 +14,7 @@ type NodeStore interface {
 	Save(n Node) error
 	Delete(n Node) error
 	Get(name string) (Node, error)
+	List() []string
 }
 
 type NodeInteractor struct {

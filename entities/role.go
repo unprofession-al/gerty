@@ -6,6 +6,7 @@ type RoleStore interface {
 	Save(r Role) error
 	Delete(r Role) error
 	Get(name string) (Role, error)
+	List() []string
 }
 
 type RoleInteractor struct {
