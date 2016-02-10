@@ -5,9 +5,9 @@ import "sort"
 
 // Node representes a configuration item (eg. a server, network component etc.).
 type Node struct {
-	Name  string
-	Vars  VarCollection
-	Roles []string
+	Name  string        `json:"name"`
+	Vars  VarCollection `json:"vars"`
+	Roles []string      `json:"roles"`
 }
 
 type NodeStore interface {

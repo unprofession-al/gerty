@@ -20,10 +20,10 @@ func NewRoleInteractor(roles RoleStore) RoleInteractor {
 // Role holds information and variables as well as position information in the
 // role tree
 type Role struct {
-	Name     string
-	Vars     VarCollection
-	Parent   string
-	Children []string
+	Name     string        `json:"name"`
+	Vars     VarCollection `json:"vars"`
+	Parent   string        `json:"parent"`
+	Children []string      `json:"childern"`
 }
 
 // LinkChild adds a given role to the current roles children.
