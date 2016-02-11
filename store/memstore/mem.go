@@ -11,7 +11,7 @@ var (
 )
 
 func init() {
-	store.Register("mem", Setup)
+	store.Register("memstore", Setup)
 }
 
 func Setup(config string) (*store.Store, error) {

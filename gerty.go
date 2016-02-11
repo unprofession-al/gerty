@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	s, err := store.New("mem", "aoeu")
+	s, err := store.New("memstore", "")
 	if err != nil {
 		panic(err)
 	}

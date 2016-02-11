@@ -25,7 +25,7 @@ func bootstrap() {
 	nodes = []string{"node1", "node_2", "node-3"}
 	roles = []string{"role1", "role_2", "role-3"}
 
-	stores, err := store.New("mem", "")
+	stores, err := store.New("memstore", "")
 	if err != nil {
 		panic(err)
 	}
