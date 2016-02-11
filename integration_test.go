@@ -10,6 +10,7 @@ import (
 	"github.com/unprofession-al/gerty/api"
 	"github.com/unprofession-al/gerty/entities"
 	"github.com/unprofession-al/gerty/store"
+	_ "github.com/unprofession-al/gerty/store/memstore"
 )
 
 var (
@@ -24,7 +25,7 @@ func bootstrap() {
 	nodes = []string{"node1", "node_2", "node-3"}
 	roles = []string{"role1", "role_2", "role-3"}
 
-	stores, err := store.Open("mem", "")
+	stores, err := store.New("mem", "")
 	if err != nil {
 		panic(err)
 	}

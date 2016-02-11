@@ -9,33 +9,27 @@ import (
 
 var (
 	stMu sync.Mutex
-	st   = make(map[string]Stores)
+	st   = make(map[string]func(string) (*Store, error))
 )
 
-type Stores struct {
+type Store struct {
 	Nodes entities.NodeStore
 	Roles entities.RoleStore
 }
 
-func register(name string, nodes entities.NodeStore, roles entities.RoleStore) {
+func Register(name string, setupFunc func(string) (*Store, error)) {
 	stMu.Lock()
 	defer stMu.Unlock()
-	if nodes == nil || roles == nil {
-		panic("store: Register store is nil")
-	}
 	if _, dup := st[name]; dup {
 		panic("store: Register called twice for store " + name)
 	}
-	st[name] = Stores{
-		Nodes: nodes,
-		Roles: roles,
-	}
+	st[name] = setupFunc
 }
 
-func Open(name string, config string) (Stores, error) {
-	stores, ok := st[name]
+func New(name string, config string) (*Store, error) {
+	setupFunc, ok := st[name]
 	if !ok {
-		return stores, errors.New("store: store '" + name + "' does not exist")
+		return nil, errors.New("store: store '" + name + "' does not exist")
 	}
-	return st[name], nil
+	return setupFunc(config)
 }

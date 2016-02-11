@@ -7,16 +7,17 @@ import (
 	"github.com/unprofession-al/gerty/api"
 	"github.com/unprofession-al/gerty/entities"
 	"github.com/unprofession-al/gerty/store"
+	_ "github.com/unprofession-al/gerty/store/memstore"
 )
 
 func main() {
-	stores, err := store.Open("mem", "")
+	s, err := store.New("mem", "aoeu")
 	if err != nil {
 		panic(err)
 	}
 
-	ri := entities.NewRoleInteractor(stores.Roles)
-	ni := entities.NewNodeInteractor(stores.Nodes, ri)
+	ri := entities.NewRoleInteractor(s.Roles)
+	ni := entities.NewNodeInteractor(s.Nodes, ri)
 
 	router := api.NewRouter(ni, ri)
 
