@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 
+	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
 	"github.com/unprofession-al/gerty/entities"
 )
@@ -10,10 +11,10 @@ import (
 var (
 	ni entities.NodeInteractor
 	ri entities.RoleInteractor
-	rt *mux.Router
+	rt http.Handler
 )
 
-func NewRouter(nodeInt entities.NodeInteractor, roleInt entities.RoleInteractor) *mux.Router {
+func NewRouter(nodeInt entities.NodeInteractor, roleInt entities.RoleInteractor) http.Handler {
 	ni = nodeInt
 	ri = roleInt
 
@@ -31,9 +32,16 @@ func NewRouter(nodeInt entities.NodeInteractor, roleInt entities.RoleInteractor)
 			Handler(handler)
 	}
 
-	rt = r
+	n := negroni.New(
+		negroni.NewRecovery(),
+		NewUserGetter(),
+	)
 
-	return r
+	n.UseHandler(r)
+
+	rt = n
+
+	return rt
 }
 
 type Route struct {
@@ -45,6 +53,11 @@ type Route struct {
 type Routes map[string]Route
 
 var apiv1Routes = Routes{
+	"TestAuth": Route{
+		Method:      "GET",
+		Pattern:     "/auth/",
+		HandlerFunc: notImplemented,
+	},
 	"ListNodes": Route{
 		Method:      "GET",
 		Pattern:     "/nodes/",
