@@ -28,10 +28,10 @@ func (rs RoleStore) Get(name string) (entities.Role, error) {
 	return role, nil
 }
 
-func (rs RoleStore) List() []string {
+func (rs RoleStore) List() ([]string, error) {
 	out := []string{}
 	for name, _ := range rs.roles {
 		out = append(out, name)
 	}
-	return out
+	return out, nil
 }

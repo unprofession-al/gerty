@@ -28,10 +28,10 @@ func (ns NodeStore) Get(name string) (entities.Node, error) {
 	return node, nil
 }
 
-func (ns NodeStore) List() []string {
+func (ns NodeStore) List() ([]string, error) {
 	out := []string{}
 	for name, _ := range ns.nodes {
 		out = append(out, name)
 	}
-	return out
+	return out, nil
 }

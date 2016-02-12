@@ -42,7 +42,7 @@ func TestRoleStoreMemList(t *testing.T) {
 	ri.Save(role1)
 	ri.Save(role2)
 
-	list := ri.List()
+	list, _ := ri.List()
 
 	if len(list) != 2 {
 		t.Errorf("Roles where not listed properly")
@@ -85,7 +85,7 @@ func TestNodeStoreMemList(t *testing.T) {
 	ni.Save(node1)
 	ni.Save(node2)
 
-	list := ni.List()
+	list, _ := ni.List()
 
 	if len(list) != 2 {
 		t.Errorf("Nodes where not listed properly")

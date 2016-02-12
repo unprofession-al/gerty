@@ -24,12 +24,12 @@ func (ns NodeStoreMock) Get(name string) (Node, error) {
 	return node, nil
 }
 
-func (ns NodeStoreMock) List() []string {
+func (ns NodeStoreMock) List() ([]string, error) {
 	out := []string{}
 	for name, _ := range ns.nodes {
 		out = append(out, name)
 	}
-	return out
+	return out, nil
 }
 
 type RoleStoreMock struct {
@@ -54,10 +54,10 @@ func (rs RoleStoreMock) Get(name string) (Role, error) {
 	return role, nil
 }
 
-func (rs RoleStoreMock) List() []string {
+func (rs RoleStoreMock) List() ([]string, error) {
 	out := []string{}
 	for name, _ := range rs.roles {
 		out = append(out, name)
 	}
-	return out
+	return out, nil
 }

@@ -10,7 +10,13 @@ import (
 
 func listRoles(res http.ResponseWriter, req *http.Request) {
 	r := render.New()
-	out := ri.List()
+
+	out, err := ri.List()
+	if err != nil {
+		r.JSON(res, http.StatusNotFound, err.Error())
+		return
+	}
+
 	r.JSON(res, http.StatusOK, out)
 }
 
@@ -19,7 +25,6 @@ func getRole(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 
 	role, err := ri.Get(vars["role"])
-
 	if err != nil {
 		r.JSON(res, http.StatusNotFound, err.Error())
 		return
@@ -35,7 +40,6 @@ func addRole(res http.ResponseWriter, req *http.Request) {
 	role := entities.Role{Name: vars["role"]}
 
 	err := ri.Save(role)
-
 	if err != nil {
 		r.JSON(res, http.StatusInternalServerError, err.Error())
 		return

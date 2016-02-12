@@ -10,7 +10,13 @@ import (
 
 func listNodes(res http.ResponseWriter, req *http.Request) {
 	r := render.New()
-	out := ni.List()
+
+	out, err := ni.List()
+	if err != nil {
+		r.JSON(res, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	r.JSON(res, http.StatusOK, out)
 }
 

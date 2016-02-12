@@ -32,7 +32,7 @@ func TestListNodes(t *testing.T) {
 	ni.Save(node2)
 	ni.Save(node3)
 
-	nodeList := ni.List()
+	nodeList, _ := ni.List()
 
 	if len(nodeList) != 3 {
 		t.Errorf("Wrong number of nodes found: `%d` != '%d'", len(nodeList), 3)

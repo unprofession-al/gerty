@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	stMu sync.Mutex
-	st   = make(map[string]func(string) (*Store, error))
+	sMu sync.Mutex
+	s   = make(map[string]func(string) (*Store, error))
 )
 
 type Store struct {
@@ -18,16 +18,16 @@ type Store struct {
 }
 
 func Register(name string, setupFunc func(string) (*Store, error)) {
-	stMu.Lock()
-	defer stMu.Unlock()
-	if _, dup := st[name]; dup {
+	sMu.Lock()
+	defer sMu.Unlock()
+	if _, dup := s[name]; dup {
 		panic("store: Register called twice for store " + name)
 	}
-	st[name] = setupFunc
+	s[name] = setupFunc
 }
 
 func New(name string, config string) (*Store, error) {
-	setupFunc, ok := st[name]
+	setupFunc, ok := s[name]
 	if !ok {
 		return nil, errors.New("store: store '" + name + "' does not exist")
 	}
