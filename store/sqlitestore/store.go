@@ -1,8 +1,6 @@
 package sqlitestore
 
 import (
-	"log"
-
 	"github.com/unprofession-al/gerty/store"
 
 	"github.com/jmoiron/sqlx"
@@ -21,7 +19,7 @@ func init() {
 func Setup(config string) (*store.Store, error) {
 	db, err := sqlx.Open("sqlite3", config)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	db.MustExec(node_schema)
