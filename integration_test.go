@@ -6,7 +6,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gorilla/mux"
 	"github.com/unprofession-al/gerty/api"
 	"github.com/unprofession-al/gerty/entities"
 	"github.com/unprofession-al/gerty/store"
@@ -15,7 +14,7 @@ import (
 
 var (
 	server *httptest.Server
-	router *mux.Router
+	router http.Handler
 	reader io.Reader
 	nodes  []string
 	roles  []string
