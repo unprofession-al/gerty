@@ -4,7 +4,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"testing"
 
 	"github.com/unprofession-al/gerty/api"
 	"github.com/unprofession-al/gerty/entities"
@@ -36,6 +35,7 @@ func bootstrap() {
 	server = httptest.NewServer(router)
 }
 
+/*
 func TestAddNodes(t *testing.T) {
 	bootstrap()
 	for _, node := range nodes {
@@ -75,3 +75,4 @@ func TestAddRoles(t *testing.T) {
 		}
 	}
 }
+*/
