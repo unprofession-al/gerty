@@ -1,4 +1,4 @@
-// package memstore implements the store interfaces and provides
+// Package memstore implements the store interfaces and provides
 // basic in-memory peristence.
 package memstore
 

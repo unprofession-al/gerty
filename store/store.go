@@ -1,5 +1,5 @@
 // Package store provides a factory for the various persistence
-// layers avaiable.
+// layers available.
 package store
 
 import (

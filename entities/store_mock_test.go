@@ -26,7 +26,7 @@ func (ns NodeStoreMock) Get(name string) (Node, error) {
 
 func (ns NodeStoreMock) List() ([]string, error) {
 	out := []string{}
-	for name, _ := range ns.nodes {
+	for name := range ns.nodes {
 		out = append(out, name)
 	}
 	return out, nil
@@ -56,7 +56,7 @@ func (rs RoleStoreMock) Get(name string) (Role, error) {
 
 func (rs RoleStoreMock) List() ([]string, error) {
 	out := []string{}
-	for name, _ := range rs.roles {
+	for name := range rs.roles {
 		out = append(out, name)
 	}
 	return out, nil

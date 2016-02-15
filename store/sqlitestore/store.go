@@ -1,4 +1,4 @@
-// package sqlitestore implements the store interfaces in order to1
+// Package sqlitestore implements the store interfaces in order to1
 // persist data to an sqlite database.
 package sqlitestore
 
@@ -26,8 +26,8 @@ func Setup(config string) (*store.Store, error) {
 		return nil, err
 	}
 
-	db.MustExec(node_schema)
-	db.MustExec(role_schema)
+	db.MustExec(nodeSchema)
+	db.MustExec(roleSchema)
 
 	nodes = NodeStore{db: db}
 	roles = RoleStore{db: db}

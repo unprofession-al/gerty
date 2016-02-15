@@ -11,7 +11,7 @@ type Role struct {
 	Children []string      `json:"childern"`
 }
 
-// RoleStore needs to be implenented by the store packge. It provides access
+// RoleStore needs to be implenented by the store package. It provides access
 // to the persistence layer to the methods defined on the NodeInteractor.
 type RoleStore interface {
 	Save(r Role) error

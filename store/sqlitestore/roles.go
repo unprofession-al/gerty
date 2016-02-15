@@ -7,7 +7,7 @@ import (
 	"github.com/unprofession-al/gerty/entities"
 )
 
-var role_schema = ` CREATE TABLE IF NOT EXISTS roles (
+var roleSchema = ` CREATE TABLE IF NOT EXISTS roles (
 	name text,
 	vars text,
 	parent text,

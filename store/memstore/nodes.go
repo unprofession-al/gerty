@@ -35,7 +35,7 @@ func (ns NodeStore) Get(name string) (entities.Node, error) {
 // List returns a list of persisted nodes by their names.
 func (ns NodeStore) List() ([]string, error) {
 	out := []string{}
-	for name, _ := range ns.nodes {
+	for name := range ns.nodes {
 		out = append(out, name)
 	}
 	return out, nil

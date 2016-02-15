@@ -35,7 +35,7 @@ func (rs RoleStore) Get(name string) (entities.Role, error) {
 // List returns a list of persisted roles by their names.
 func (rs RoleStore) List() ([]string, error) {
 	out := []string{}
-	for name, _ := range rs.roles {
+	for name := range rs.roles {
 		out = append(out, name)
 	}
 	return out, nil

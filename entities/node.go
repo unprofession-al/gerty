@@ -10,7 +10,7 @@ type Node struct {
 	Roles []string      `json:"roles"`
 }
 
-// NodeStore needs to be implenented by the store packge. It provides access
+// NodeStore needs to be implenented by the store package. It provides access
 // to the persistence layer to the methods defined on the NodeInteractor.
 type NodeStore interface {
 	Save(n Node) error

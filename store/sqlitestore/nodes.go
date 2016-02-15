@@ -7,7 +7,7 @@ import (
 	"github.com/unprofession-al/gerty/entities"
 )
 
-var node_schema = `CREATE TABLE IF NOT EXISTS nodes (
+var nodeSchema = `CREATE TABLE IF NOT EXISTS nodes (
 	name text,
 	vars text,
 	roles text,
