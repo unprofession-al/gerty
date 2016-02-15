@@ -32,7 +32,7 @@ func Register(name string, setupFunc func(string) (*Store, error)) {
 	s[name] = setupFunc
 }
 
-// New returns a Store containg the sperified and configured NodeStore and
+// New returns a Store containg the specified and configured NodeStore and
 // RoleStore implemetations.
 func New(name string, config string) (*Store, error) {
 	setupFunc, ok := s[name]
