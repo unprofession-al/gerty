@@ -6,7 +6,7 @@ import (
 	"github.com/unprofession-al/gerty/store"
 
 	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3" // import is blank since registration to sql/sqlx is done via init func
 )
 
 var (
