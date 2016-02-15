@@ -15,6 +15,7 @@ var role_schema = ` CREATE TABLE IF NOT EXISTS roles (
 	PRIMARY KEY (name)
 );`
 
+// Role defines the structure of the database entries.
 type Role struct {
 	Name     string `db:"name"`
 	Vars     string `db:"vars"`
@@ -22,10 +23,12 @@ type Role struct {
 	Children string `db:"children"`
 }
 
+// RoleStore implements the entities.RoleStore interface.
 type RoleStore struct {
 	db *sqlx.DB
 }
 
+// Save saves/replaces a given role.
 func (rs RoleStore) Save(r entities.Role) error {
 	vars, err := json.Marshal(r.Vars)
 	if err != nil {
@@ -51,6 +54,7 @@ func (rs RoleStore) Save(r entities.Role) error {
 	return err
 }
 
+// Delete deletes a given role.
 func (rs RoleStore) Delete(r entities.Role) error {
 	role := &Role{Name: r.Name}
 
@@ -60,6 +64,7 @@ func (rs RoleStore) Delete(r entities.Role) error {
 	return err
 }
 
+// Get retireves a role by its name.
 func (rs RoleStore) Get(name string) (entities.Role, error) {
 
 	r := Role{}
@@ -91,6 +96,7 @@ func (rs RoleStore) Get(name string) (entities.Role, error) {
 	return role, nil
 }
 
+// List returns a list of persisted roles by their names.
 func (rs RoleStore) List() ([]string, error) {
 	out := []string{}
 

@@ -14,16 +14,22 @@ var node_schema = `CREATE TABLE IF NOT EXISTS nodes (
 	PRIMARY KEY (name)
 );`
 
+// Node defines the structure of the database entries.
 type Node struct {
-	Name  string `db:"name"`
-	Vars  string `db:"vars"`
+	// name is the primary key
+	Name string `db:"name"`
+	// vars are stored serialized as json
+	Vars string `db:"vars"`
+	// roles are stored serialized as json
 	Roles string `db:"roles"`
 }
 
+// NodeStore implements the entities.NodeStore interface.
 type NodeStore struct {
 	db *sqlx.DB
 }
 
+// Save saves/replaces a given node.
 func (ns NodeStore) Save(n entities.Node) error {
 	vars, err := json.Marshal(n.Vars)
 	if err != nil {
@@ -48,6 +54,7 @@ func (ns NodeStore) Save(n entities.Node) error {
 	return err
 }
 
+// Delete deletes a given node.
 func (ns NodeStore) Delete(n entities.Node) error {
 	node := &Node{Name: n.Name}
 
@@ -57,6 +64,7 @@ func (ns NodeStore) Delete(n entities.Node) error {
 	return err
 }
 
+// Get retireves a node by its name.
 func (ns NodeStore) Get(name string) (entities.Node, error) {
 	n := Node{}
 
@@ -86,6 +94,7 @@ func (ns NodeStore) Get(name string) (entities.Node, error) {
 	return node, nil
 }
 
+// List returns a list of persisted nodes by their names.
 func (ns NodeStore) List() ([]string, error) {
 	out := []string{}
 

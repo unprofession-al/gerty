@@ -10,6 +10,8 @@ type Node struct {
 	Roles []string      `json:"roles"`
 }
 
+// NodeStore needs to be implenented by the store packge. It provides access
+// to the persistence layer to the methods defined on the NodeInteractor.
 type NodeStore interface {
 	Save(n Node) error
 	Delete(n Node) error
@@ -17,11 +19,14 @@ type NodeStore interface {
 	List() ([]string, error)
 }
 
+// NodeInteractor couples common actions with its persistence layer.
 type NodeInteractor struct {
 	NodeStore
 	roles RoleInteractor
 }
 
+// NewNodeInteractor takes the required store implementations and returns
+// a NodeInteractor in order to make its methodes available.
 func NewNodeInteractor(nodes NodeStore, roles RoleInteractor) NodeInteractor {
 	return NodeInteractor{
 		NodeStore: nodes,

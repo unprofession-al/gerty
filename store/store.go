@@ -1,3 +1,5 @@
+// Package store provides a factory for the various persistence
+// layers avaiable.
 package store
 
 import (
@@ -12,11 +14,15 @@ var (
 	s   = make(map[string]func(string) (*Store, error))
 )
 
+// Store encapsules the NodeStore and RoleStore implementations.
 type Store struct {
 	Nodes entities.NodeStore
 	Roles entities.RoleStore
 }
 
+// Register is called in the init() funcs of the actual Store
+// implemetations in order to make the implementation available
+// to the factory.
 func Register(name string, setupFunc func(string) (*Store, error)) {
 	sMu.Lock()
 	defer sMu.Unlock()
@@ -26,6 +32,8 @@ func Register(name string, setupFunc func(string) (*Store, error)) {
 	s[name] = setupFunc
 }
 
+// New returns a Store containg the sperified and configured NodeStore and
+// RoleStore implemetations.
 func New(name string, config string) (*Store, error) {
 	setupFunc, ok := s[name]
 	if !ok {

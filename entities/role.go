@@ -2,21 +2,6 @@ package entities
 
 import "errors"
 
-type RoleStore interface {
-	Save(r Role) error
-	Delete(r Role) error
-	Get(name string) (Role, error)
-	List() ([]string, error)
-}
-
-type RoleInteractor struct {
-	RoleStore
-}
-
-func NewRoleInteractor(roles RoleStore) RoleInteractor {
-	return RoleInteractor{RoleStore: roles}
-}
-
 // Role holds information and variables as well as position information in the
 // role tree
 type Role struct {
@@ -24,6 +9,26 @@ type Role struct {
 	Vars     VarCollection `json:"vars"`
 	Parent   string        `json:"parent"`
 	Children []string      `json:"childern"`
+}
+
+// RoleStore needs to be implenented by the store packge. It provides access
+// to the persistence layer to the methods defined on the NodeInteractor.
+type RoleStore interface {
+	Save(r Role) error
+	Delete(r Role) error
+	Get(name string) (Role, error)
+	List() ([]string, error)
+}
+
+// RoleInteractor couples common actions with its persistence layer.
+type RoleInteractor struct {
+	RoleStore
+}
+
+// NewRoleInteractor takes the required store implementation and returns
+// a RoleInteractor in order to make its methodes available.
+func NewRoleInteractor(roles RoleStore) RoleInteractor {
+	return RoleInteractor{RoleStore: roles}
 }
 
 // LinkChild adds a given role to the current roles children.
