@@ -20,7 +20,7 @@ func main() {
 	ri := entities.NewRoleInteractor(s.Roles)
 	ni := entities.NewNodeInteractor(s.Nodes, ri)
 
-	router := api.NewRouter(ni, ri)
+	apiRouter := api.NewRouter(ni, ri)
 
-	log.Fatal(http.ListenAndServe(":8008", router))
+	log.Fatal(http.ListenAndServe(":8008", apiRouter))
 }

@@ -47,3 +47,41 @@ func addRole(res http.ResponseWriter, req *http.Request) {
 
 	r.JSON(res, http.StatusCreated, role)
 }
+
+func getRoleParent(res http.ResponseWriter, req *http.Request) {
+	r := render.New()
+	vars := mux.Vars(req)
+
+	role, err := ri.Get(vars["role"])
+	if err != nil {
+		r.JSON(res, http.StatusNotFound, err.Error())
+		return
+	}
+
+	r.JSON(res, http.StatusOK, role.Parent)
+}
+
+func addRoleParent(res http.ResponseWriter, req *http.Request) {
+	r := render.New()
+	vars := mux.Vars(req)
+
+	role, err := ri.Get(vars["role"])
+	if err != nil {
+		r.JSON(res, http.StatusNotFound, err.Error())
+		return
+	}
+
+	parent, err := ri.Get(vars["parent"])
+	if err != nil {
+		r.JSON(res, http.StatusNotFound, err.Error())
+		return
+	}
+
+	err = ri.LinkChild(&parent, &role)
+	if err != nil {
+		r.JSON(res, http.StatusNotFound, err.Error())
+		return
+	}
+
+	r.JSON(res, http.StatusOK, role.Parent)
+}
