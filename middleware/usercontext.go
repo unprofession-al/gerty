@@ -9,8 +9,7 @@ import (
 )
 
 const (
-	// Name of the Header field to store the username
-	HeaderUserName        = "G-UserName"
+	HeaderUserName        = "G-UserName" // Name of the Header field to store the username
 	defaultUserName       = "Sam Bell"
 	defaultBrokenUserName = "Bam Sell"
 )
