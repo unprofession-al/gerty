@@ -4,21 +4,23 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/justinas/alice"
 	"github.com/unprofession-al/gerty/entities"
 )
 
 var (
 	ni entities.NodeInteractor
 	ri entities.RoleInteractor
-	rt http.Handler
 )
 
-func NewRouter(nodeInt entities.NodeInteractor, roleInt entities.RoleInteractor) http.Handler {
+// InjectRouter stores the required Interactors as global vars in order to
+// provide access to the persistence layer and business logic.
+func InjectRouter(nodeInt entities.NodeInteractor, roleInt entities.RoleInteractor) {
 	ni = nodeInt
 	ri = roleInt
+}
 
-	r := mux.NewRouter().StrictSlash(true)
+// PopulateRouter appends all defined routes to a given gorilla mux router.
+func PopulateRouter(r *mux.Router) {
 	apiv1 := r.PathPrefix("/api/v1/").Subrouter()
 
 	for name, route := range apiv1Routes {
@@ -33,16 +35,22 @@ func NewRouter(nodeInt entities.NodeInteractor, roleInt entities.RoleInteractor)
 			Name(name).
 			Handler(h)
 	}
-
-	chain := alice.New(recoverMiddleware, userContextMiddleware).Then(r)
-	rt = chain
-
-	return rt
 }
 
-func notImplemented(w http.ResponseWriter, r *http.Request) {
-	user := getUserContext(r)
-	w.WriteHeader(http.StatusNotImplemented)
+func notImplemented(res http.ResponseWriter, req *http.Request) {
+	user := req.Header.Get("")
+	res.WriteHeader(http.StatusNotImplemented)
 	out := "Function Not Yet Implemented, " + user + "\n"
-	w.Write([]byte(out))
+	res.Write([]byte(out))
 }
+
+type route struct {
+	// method
+	m string
+	// pattern
+	p string
+	// HandlerFunc
+	h http.HandlerFunc
+}
+
+type routes map[string]route
