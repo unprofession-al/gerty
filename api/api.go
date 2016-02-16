@@ -13,16 +13,16 @@ var (
 	ri entities.RoleInteractor
 )
 
-// InjectRouter stores the required Interactors as global vars in order to
+// InjectRoutes stores the required Interactors as global vars in order to
 // provide access to the persistence layer and business logic.
-func InjectRouter(nodeInt entities.NodeInteractor, roleInt entities.RoleInteractor) {
+func InjectAPI(nodeInt entities.NodeInteractor, roleInt entities.RoleInteractor) {
 	ni = nodeInt
 	ri = roleInt
 }
 
 // PopulateRouter appends all defined routes to a given gorilla mux router.
 func PopulateRouter(r *mux.Router) {
-	apiv1 := r.PathPrefix("/api/v1/").Subrouter()
+	apiv1 := r.PathPrefix("/v1/").Subrouter()
 
 	for name, route := range apiv1Routes {
 		h := route.h

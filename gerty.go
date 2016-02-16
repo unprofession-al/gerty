@@ -23,12 +23,13 @@ func main() {
 	ri := entities.NewRoleInteractor(s.Roles)
 	ni := entities.NewNodeInteractor(s.Nodes, ri)
 
-	api.InjectRouter(ni, ri)
+	api.InjectAPI(ni, ri)
+
 	r := mux.NewRouter().StrictSlash(true)
-	api.PopulateRouter(r)
+	a := r.PathPrefix("/api/").Subrouter()
+	api.PopulateRouter(a)
 
 	chain := alice.New(mw.RecoverPanic, mw.UserContext).Then(r)
-	//apiRouter := api.NewRouter(ni, ri)
 
 	log.Fatal(http.ListenAndServe(":8008", chain))
 }
