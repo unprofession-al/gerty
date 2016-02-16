@@ -13,6 +13,8 @@ var (
 	ri entities.RoleInteractor
 )
 
+var routes = make(map[string]routeDefinition)
+
 // InjectRoutes stores the required Interactors as global vars in order to
 // provide access to the persistence layer and business logic.
 func InjectAPI(nodeInt entities.NodeInteractor, roleInt entities.RoleInteractor) {
@@ -21,20 +23,22 @@ func InjectAPI(nodeInt entities.NodeInteractor, roleInt entities.RoleInteractor)
 }
 
 // PopulateRouter appends all defined routes to a given gorilla mux router.
-func PopulateRouter(r *mux.Router) {
-	apiv1 := r.PathPrefix("/v1/").Subrouter()
+func PopulateRouter(router *mux.Router) {
+	for version, r := range routes {
+		apiv1 := router.PathPrefix("/" + version + "/").Subrouter()
 
-	for name, route := range apiv1Routes {
-		h := route.h
-		if h == nil {
-			h = notImplemented
+		for name, route := range r {
+			h := route.h
+			if h == nil {
+				h = notImplemented
+			}
+
+			apiv1.
+				Methods(route.m).
+				Path(route.p).
+				Name(name).
+				Handler(h)
 		}
-
-		apiv1.
-			Methods(route.m).
-			Path(route.p).
-			Name(name).
-			Handler(h)
 	}
 }
 
@@ -54,4 +58,4 @@ type route struct {
 	h http.HandlerFunc
 }
 
-type routes map[string]route
+type routeDefinition map[string]route
