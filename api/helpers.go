@@ -87,6 +87,10 @@ func parseBody(req *http.Request, s interface{}) error {
 // The keys of map[interface{}]interface{} maps will be converted to
 // strings with a %v format string, as will any scalar values that
 // aren't already strings (i.e. numbers and boolean values).
+//
+// Idea and implementation are stolen from:
+// https://github.com/elastic/beats/blob/master/libbeat/common/mapstr.go
+// Credit goes to Magnus Bäck: https://github.com/magnusbaeck
 func unmarshalYAML(in []byte, s interface{}) error {
 	var dest *map[string]interface{}
 	var ok bool
