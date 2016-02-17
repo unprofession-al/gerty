@@ -43,14 +43,6 @@ func respond(res http.ResponseWriter, req *http.Request, code int, data interfac
 	return
 }
 
-func getBodyAsBytes(body io.ReadCloser) ([]byte, error) {
-	b, err := ioutil.ReadAll(body)
-	if err != nil {
-		return []byte{}, err
-	}
-	return b, nil
-}
-
 // parseBody reads the payload of a request and formats unmarshals it
 // accoding to the format specified in the 'd' url parameter ('d' stands
 // for 'data'). Default format is json.
@@ -77,6 +69,14 @@ func parseBody(req *http.Request, s interface{}) error {
 	}
 
 	return err
+}
+
+func getBodyAsBytes(body io.ReadCloser) ([]byte, error) {
+	b, err := ioutil.ReadAll(body)
+	if err != nil {
+		return []byte{}, err
+	}
+	return b, nil
 }
 
 // unmarshalYAML helps out with the YAML unmarshalling in order to provide
