@@ -38,6 +38,7 @@ func respond(res http.ResponseWriter, req *http.Request, code int, data interfac
 		out = errMesg
 		res.WriteHeader(http.StatusInternalServerError)
 	} else {
+		res.WriteHeader(code)
 		res.Write(out)
 	}
 	return

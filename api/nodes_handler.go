@@ -32,8 +32,52 @@ func getNode(res http.ResponseWriter, req *http.Request) {
 func addNode(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 
+	node, err := ni.Get(vars["node"])
+	if err == nil {
+		respond(res, req, http.StatusConflict, "already exists")
+		return
+	}
+
+	node = entities.Node{Name: vars["node"]}
+
+	err = ni.Save(node)
+	if err != nil {
+		respond(res, req, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	respond(res, req, http.StatusCreated, node)
+}
+
+func delNode(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+
+	node, err := ni.Get(vars["node"])
+	if err != nil {
+		respond(res, req, http.StatusNotFound, err.Error())
+		return
+	}
+
+	err = ni.Delete(node)
+	if err != nil {
+		respond(res, req, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	respond(res, req, http.StatusOK, "deleted")
+}
+
+func addNodeVars(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+
+	node, err := ni.Get(vars["node"])
+	if err != nil {
+		respond(res, req, http.StatusNotFound, err.Error())
+		return
+	}
+
 	var nodeVars map[string]interface{}
-	err := parseBody(req, &nodeVars)
+	err = parseBody(req, &nodeVars)
 	if err != nil {
 		respond(res, req, http.StatusInternalServerError, err.Error())
 		return
@@ -45,7 +89,6 @@ func addNode(res http.ResponseWriter, req *http.Request) {
 		Name: "native",
 	}
 
-	node := entities.Node{Name: vars["node"]}
 	node.Vars.AddOrReplaceBucket(v)
 
 	err = ni.Save(node)
@@ -103,4 +146,36 @@ func linkNodeToRole(res http.ResponseWriter, req *http.Request) {
 	}
 
 	respond(res, req, http.StatusCreated, node)
+}
+
+func unlinkNodeFromRole(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+
+	node := entities.Node{Name: vars["node"]}
+	node, err := ni.Get(vars["node"])
+	if err != nil {
+		respond(res, req, http.StatusNotFound, err.Error())
+		return
+	}
+
+	role, err := ri.Get(vars["role"])
+	if err != nil {
+		respond(res, req, http.StatusNotFound, err.Error())
+		return
+	}
+
+	for i, roleName := range node.Roles {
+		if roleName == role.Name {
+			node.Roles = append(node.Roles[:i], node.Roles[i+1:]...)
+			break
+		}
+	}
+
+	err = ni.Save(node)
+	if err != nil {
+		respond(res, req, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	respond(res, req, http.StatusOK, node)
 }
