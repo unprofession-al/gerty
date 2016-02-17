@@ -25,7 +25,7 @@ func InjectAPI(nodeInt entities.NodeInteractor, roleInt entities.RoleInteractor)
 // PopulateRouter appends all defined routes to a given gorilla mux router.
 func PopulateRouter(router *mux.Router) {
 	for version, r := range routes {
-		apiv1 := router.PathPrefix("/" + version + "/").Subrouter()
+		api := router.PathPrefix("/" + version + "/").Subrouter()
 
 		for name, route := range r {
 			h := route.h
@@ -33,7 +33,7 @@ func PopulateRouter(router *mux.Router) {
 				h = notImplemented
 			}
 
-			apiv1.
+			api.
 				Methods(route.m).
 				Path(route.p).
 				Name(name).
