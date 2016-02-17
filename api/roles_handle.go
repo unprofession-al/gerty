@@ -58,6 +58,9 @@ func delRole(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// TODO: the relations must be sanitized on store level and must not be
+	// done via handlers. Also, if a role is deleted, related nodes must be
+	// unlinked.
 	if role.Parent != "" {
 		parent, err := ri.Get(role.Parent)
 		if err != nil {
