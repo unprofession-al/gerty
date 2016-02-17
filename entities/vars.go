@@ -6,14 +6,11 @@ import (
 	"sort"
 )
 
-// VarList holds variables in a key/value like manner.
-type VarList map[string]interface{}
-
 // VarBucket adds a name and a priority to a VarList.
 type VarBucket struct {
-	Name string  `json:"name"`
-	Prio int     `json:"prio"` // lower value means higher priority
-	Vars VarList `json:"vars"`
+	Name string                 `json:"name"`
+	Prio int                    `json:"prio"` // lower value means higher priority
+	Vars map[string]interface{} `json:"vars"`
 }
 
 // VarCollection groups together multiple VarBuckets. This entity is

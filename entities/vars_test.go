@@ -9,7 +9,7 @@ var tests = []VarBucket{
 	{
 		Name: "Bucket 1",
 		Prio: 1,
-		Vars: VarList{
+		Vars: map[string]interface{}{
 			"Key 1": "Value A",
 			"Key 2": "Value B",
 		},
@@ -17,7 +17,7 @@ var tests = []VarBucket{
 	{
 		Name: "Bucket 2",
 		Prio: 0,
-		Vars: VarList{
+		Vars: map[string]interface{}{
 			"Key 2": "Value C",
 			"Key 3": "Value D",
 		},
@@ -25,7 +25,7 @@ var tests = []VarBucket{
 	{
 		Name: "Bucket 3",
 		Prio: 3,
-		Vars: VarList{
+		Vars: map[string]interface{}{
 			"Key 2": "Value E",
 			"Key 3": "Value F",
 			"Key 4": "Value G",

@@ -5,87 +5,91 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/unprofession-al/gerty/entities"
-	"github.com/unrolled/render"
 )
 
 func listNodes(res http.ResponseWriter, req *http.Request) {
-	r := render.New()
-
 	out, err := ni.List()
 	if err != nil {
-		r.JSON(res, http.StatusInternalServerError, err.Error())
+		respond(res, req, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	r.JSON(res, http.StatusOK, out)
+	respond(res, req, http.StatusOK, out)
 }
 
 func getNode(res http.ResponseWriter, req *http.Request) {
-	r := render.New()
-
 	vars := mux.Vars(req)
 
 	node, err := ni.Get(vars["node"])
 	if err != nil {
-		r.JSON(res, http.StatusNotFound, err.Error())
+		respond(res, req, http.StatusNotFound, err.Error())
 		return
 	}
 
-	r.JSON(res, http.StatusOK, node)
+	respond(res, req, http.StatusCreated, node)
 }
 
 func addNode(res http.ResponseWriter, req *http.Request) {
-	r := render.New()
 	vars := mux.Vars(req)
 
-	node := entities.Node{Name: vars["node"]}
-
-	err := ni.Save(node)
+	var nodeVars map[string]interface{}
+	err := parseBody(req, &nodeVars)
 	if err != nil {
-		r.JSON(res, http.StatusInternalServerError, err.Error())
+		respond(res, req, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	r.JSON(res, http.StatusCreated, node)
+	v := entities.VarBucket{
+		Prio: 0,
+		Vars: nodeVars,
+		Name: "native",
+	}
+
+	node := entities.Node{Name: vars["node"]}
+	node.Vars.AddOrReplaceBucket(v)
+
+	err = ni.Save(node)
+	if err != nil {
+		respond(res, req, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	respond(res, req, http.StatusCreated, node)
 }
 
 func getNodeVars(res http.ResponseWriter, req *http.Request) {
-	r := render.New()
-
 	vars := mux.Vars(req)
 
 	node, err := ni.Get(vars["node"])
 	if err != nil {
-		r.JSON(res, http.StatusNotFound, err.Error())
+		respond(res, req, http.StatusNotFound, err.Error())
 		return
 	}
 
 	out := ni.GetVars(node)
 
-	r.JSON(res, http.StatusOK, out)
+	respond(res, req, http.StatusOK, out)
 }
 
 func linkNodeToRole(res http.ResponseWriter, req *http.Request) {
-	r := render.New()
-
 	vars := mux.Vars(req)
 
 	node := entities.Node{Name: vars["node"]}
 	node, err := ni.Get(vars["node"])
 	if err != nil {
-		r.JSON(res, http.StatusNotFound, err.Error())
+		respond(res, req, http.StatusNotFound, err.Error())
 		return
 	}
 
 	role, err := ri.Get(vars["role"])
 	if err != nil {
-		r.JSON(res, http.StatusNotFound, err.Error())
+		respond(res, req, http.StatusNotFound, err.Error())
 		return
 	}
 
 	for _, roleName := range node.Roles {
 		if roleName == role.Name {
-			r.JSON(res, http.StatusNotModified, node)
+			respond(res, req, http.StatusNotModified, node)
 			return
 		}
 	}
@@ -94,9 +98,9 @@ func linkNodeToRole(res http.ResponseWriter, req *http.Request) {
 
 	err = ni.Save(node)
 	if err != nil {
-		r.JSON(res, http.StatusInternalServerError, err.Error())
+		respond(res, req, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	r.JSON(res, http.StatusCreated, node)
+	respond(res, req, http.StatusCreated, node)
 }

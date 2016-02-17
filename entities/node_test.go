@@ -62,7 +62,7 @@ var r = map[string]*Role{
 			VarBucket{
 				Prio: 1,
 				Name: "bucket 1",
-				Vars: VarList{
+				Vars: map[string]interface{}{
 					"Var 1": "Value A",
 					"Var 2": "Value A",
 					"Var 3": "Value A",
@@ -80,7 +80,7 @@ var r = map[string]*Role{
 			VarBucket{
 				Prio: 1,
 				Name: "bucket 1",
-				Vars: VarList{
+				Vars: map[string]interface{}{
 					"Var 2": "Value B",
 				},
 			},
@@ -92,7 +92,7 @@ var r = map[string]*Role{
 			VarBucket{
 				Prio: 1,
 				Name: "bucket 1",
-				Vars: VarList{
+				Vars: map[string]interface{}{
 					"Var 4": "Value C",
 					"Var 5": "Value C",
 				},
@@ -105,7 +105,7 @@ var r = map[string]*Role{
 			VarBucket{
 				Prio: 1,
 				Name: "bucket 1",
-				Vars: VarList{
+				Vars: map[string]interface{}{
 					"Var 1": "Value D",
 				},
 			},
@@ -117,7 +117,7 @@ var r = map[string]*Role{
 			VarBucket{
 				Prio: 1,
 				Name: "bucket 1",
-				Vars: VarList{
+				Vars: map[string]interface{}{
 					"Var 3": "Value E",
 					"Var 6": "Value E",
 				},
@@ -130,7 +130,7 @@ var r = map[string]*Role{
 			VarBucket{
 				Prio: 1,
 				Name: "bucket 1",
-				Vars: VarList{
+				Vars: map[string]interface{}{
 					"Var 5": "Value F",
 					"Var 6": "Value F",
 				},
@@ -143,7 +143,7 @@ var r = map[string]*Role{
 			VarBucket{
 				Prio: 1,
 				Name: "bucket 1",
-				Vars: VarList{
+				Vars: map[string]interface{}{
 					"Var 3": "Value G",
 				},
 			},
@@ -155,7 +155,7 @@ var r = map[string]*Role{
 			VarBucket{
 				Prio: 1,
 				Name: "bucket 1",
-				Vars: VarList{
+				Vars: map[string]interface{}{
 					"Var 1": "Value H",
 				},
 			},
@@ -209,7 +209,7 @@ func TestNodeMerging(t *testing.T) {
 			VarBucket{
 				Prio: 1,
 				Name: "bucket 1",
-				Vars: VarList{
+				Vars: map[string]interface{}{
 					"Var 8": "Value HOST",
 				},
 			},
