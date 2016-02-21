@@ -1,27 +1,12 @@
 package sqlitestore
 
 import (
+	"database/sql"
 	"encoding/json"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/unprofession-al/gerty/entities"
 )
-
-var roleSchema = ` CREATE TABLE IF NOT EXISTS roles (
-	name text,
-	vars text,
-	parent text,
-	children text,
-	PRIMARY KEY (name)
-);`
-
-// Role defines the structure of the database entries.
-type Role struct {
-	Name     string `db:"name"`
-	Vars     string `db:"vars"`
-	Parent   string `db:"parent"`
-	Children string `db:"children"`
-}
 
 // RoleStore implements the entities.RoleStore interface.
 type RoleStore struct {
@@ -30,26 +15,38 @@ type RoleStore struct {
 
 // Save saves/replaces a given role.
 func (rs RoleStore) Save(r entities.Role) error {
+	role := &Role{Name: r.Name}
+
+	// serialize vars
 	vars, err := json.Marshal(r.Vars)
 	if err != nil {
 		return err
 	}
+	role.Vars = string(vars)
 
-	children, err := json.Marshal(r.Children)
-	if err != nil {
-		return err
+	// setup transaction
+	tx, err := rs.db.Beginx()
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	// get id of parent role
+	var parentID sql.NullInt64
+	if r.Parent != "" {
+		err = tx.Get(&parentID, "SELECT id FROM role WHERE name = $1;", r.Parent)
+		if err != nil {
+			return err
+		}
+		role.Parent = parentID
 	}
 
-	role := &Role{
-		Name:     r.Name,
-		Vars:     string(vars),
-		Parent:   r.Parent,
-		Children: string(children),
-	}
-
-	_, err = rs.db.NamedExec(`INSERT OR REPLACE INTO
-		roles(name, vars, parent, children)
-		VALUES(:name, :vars, :parent, :children)`, role)
+	_, err = tx.NamedExec(`INSERT OR REPLACE INTO
+		role(name, vars, parent)
+		VALUES(:name, :vars, :parent);`, role)
 
 	return err
 }
@@ -58,8 +55,8 @@ func (rs RoleStore) Save(r entities.Role) error {
 func (rs RoleStore) Delete(r entities.Role) error {
 	role := &Role{Name: r.Name}
 
-	_, err := rs.db.NamedExec(`DELETE FROM roles
-		WHERE name = :name`, role)
+	_, err := rs.db.NamedExec(`DELETE FROM role
+		WHERE name = :name;`, role)
 
 	return err
 }
@@ -69,7 +66,11 @@ func (rs RoleStore) Get(name string) (entities.Role, error) {
 
 	r := Role{}
 
-	err := rs.db.Get(&r, "SELECT * FROM roles WHERE name=$1", name)
+	err := rs.db.Get(&r, `SELECT r1.id, r1.name, r1.vars, r2.name AS parent_name
+	                        FROM role r1
+	             LEFT OUTER JOIN role r2
+	                          ON r1.parent = r2.id
+	                       WHERE r1.name = $1;`, name)
 	if err != nil {
 		return entities.Role{}, err
 	}
@@ -80,8 +81,9 @@ func (rs RoleStore) Get(name string) (entities.Role, error) {
 		return entities.Role{}, err
 	}
 
+	// SELECT '[\"' || GROUP_CONCAT(name,'\",\"') || '\"]' AS aoeua FROM role WHERE parent=1;
 	children := []string{}
-	err = json.Unmarshal([]byte(r.Children), &children)
+	err = rs.db.Select(&children, "SELECT name FROM role WHERE parent = $1;", r.ID)
 	if err != nil {
 		return entities.Role{}, err
 	}
@@ -89,7 +91,7 @@ func (rs RoleStore) Get(name string) (entities.Role, error) {
 	role := entities.Role{
 		Name:     r.Name,
 		Vars:     vars,
-		Parent:   r.Parent,
+		Parent:   r.ParentName,
 		Children: children,
 	}
 
@@ -100,7 +102,7 @@ func (rs RoleStore) Get(name string) (entities.Role, error) {
 func (rs RoleStore) List() ([]string, error) {
 	out := []string{}
 
-	err := rs.db.Select(&out, "SELECT name FROM roles")
+	err := rs.db.Select(&out, "SELECT name FROM role;")
 
 	return out, err
 }
