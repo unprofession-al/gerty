@@ -15,7 +15,7 @@ var (
 
 var routes = make(map[string]routeDefinition)
 
-// InjectRoutes stores the required Interactors as global vars in order to
+// InjectAPI stores the required Interactors as global vars in order to
 // provide access to the persistence layer and business logic.
 func InjectAPI(nodeInt entities.NodeInteractor, roleInt entities.RoleInteractor) {
 	ni = nodeInt

@@ -41,7 +41,7 @@ func (ns NodeStore) Save(n entities.Node) error {
 
 	// save relations to roles if required
 	if len(n.Roles) > 0 {
-		nodeId, err := result.LastInsertId()
+		nodeID, err := result.LastInsertId()
 		if err != nil {
 			return err
 		}
@@ -50,7 +50,7 @@ func (ns NodeStore) Save(n entities.Node) error {
 			NodeID int64    `db:"nid"`
 			Roles  []string `db:"roles"`
 		}{
-			NodeID: nodeId,
+			NodeID: nodeID,
 			Roles:  n.Roles,
 		}
 

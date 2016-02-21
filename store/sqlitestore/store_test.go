@@ -64,7 +64,7 @@ func TestStore(t *testing.T) {
 
 	// delete grandchild
 	if err := s.Roles.Delete(grandchildOrig); err != nil {
-		t.Error("Grandchild could not be deleted: %s", err.Error())
+		t.Errorf("Grandchild could not be deleted: %s", err.Error())
 	}
 
 	// fetch node
@@ -80,7 +80,7 @@ func TestStore(t *testing.T) {
 
 	// delete child
 	if err := s.Roles.Delete(childOrig); err != nil {
-		t.Error("Child could not be deleted: %s", err.Error())
+		t.Errorf("Child could not be deleted: %s", err.Error())
 	}
 
 	// fetch node
