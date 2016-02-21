@@ -57,14 +57,14 @@ func TestStore(t *testing.T) {
 	}
 
 	// save node with roles
-	nodeOrig := entities.Node{Name: "testnode", Roles: []string{roleOrig.Name, grandchildOrig.Name}}
+	nodeOrig := entities.Node{Name: "testnode", Roles: []string{childOrig.Name, grandchildOrig.Name}}
 	if err := s.Nodes.Save(nodeOrig); err != nil {
 		t.Errorf("Node could not be stored: %s", err.Error())
 	}
 
-	// try to delete grandchild, which should fail
-	if err := s.Roles.Delete(grandchildOrig); err == nil {
-		t.Error("Grandchild could be deleted, should not")
+	// delete grandchild
+	if err := s.Roles.Delete(grandchildOrig); err != nil {
+		t.Error("Grandchild could not be deleted: %s", err.Error())
 	}
 
 	// fetch node
@@ -72,6 +72,29 @@ func TestStore(t *testing.T) {
 	if err != nil {
 		t.Errorf("Node could not be fetched: %s", err.Error())
 	}
+
+	// inspert node
+	if roleCount := len(nodeFetched.Roles); roleCount != 1 {
+		t.Errorf("Node has wrong number of Roles: %d, should be 1", roleCount)
+	}
+
+	// delete child
+	if err := s.Roles.Delete(childOrig); err != nil {
+		t.Error("Child could not be deleted: %s", err.Error())
+	}
+
+	// fetch node
+	nodeFetched, err = s.Nodes.Get("testnode")
+	if err != nil {
+		t.Errorf("Node could not be fetched: %s", err.Error())
+	}
+
+	// inspert node
+	if roleCount := len(nodeFetched.Roles); roleCount != 0 {
+		t.Errorf("Node has wrong number of Roles: %d, should be 1", roleCount)
+	}
+
+	// delete child
 
 	// fetch nodes
 	if _, err := s.Nodes.List(); err != nil {

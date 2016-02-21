@@ -24,27 +24,17 @@ func (rs RoleStore) Save(r entities.Role) error {
 	}
 	role.Vars = string(vars)
 
-	// setup transaction
-	tx, err := rs.db.Beginx()
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-			return
-		}
-		err = tx.Commit()
-	}()
-
 	// get id of parent role
 	var parentID sql.NullInt64
 	if r.Parent != "" {
-		err = tx.Get(&parentID, "SELECT id FROM role WHERE name = $1;", r.Parent)
+		err = rs.db.Get(&parentID, "SELECT id FROM role WHERE name = $1;", r.Parent)
 		if err != nil {
 			return err
 		}
 		role.Parent = parentID
 	}
 
-	_, err = tx.NamedExec(`INSERT OR REPLACE INTO
+	_, err = rs.db.NamedExec(`INSERT OR REPLACE INTO
 		role(name, vars, parent)
 		VALUES(:name, :vars, :parent);`, role)
 
