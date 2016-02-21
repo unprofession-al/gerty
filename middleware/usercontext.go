@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// Name of the Header field to store the username
+// HeaderUserName holds the string of the header field to store the username
 const HeaderUserName = "G-UserName"
 
 const (
