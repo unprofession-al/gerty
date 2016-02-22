@@ -1,8 +1,6 @@
 package sqlitestore
 
 import (
-	"encoding/json"
-
 	"github.com/jmoiron/sqlx"
 	"github.com/unprofession-al/gerty/entities"
 )
@@ -14,7 +12,7 @@ type NodeStore struct {
 
 // Save saves/replaces a given node.
 func (ns NodeStore) Save(n entities.Node) error {
-	vars, err := json.Marshal(n.Vars)
+	vars, err := n.Vars.Serialize()
 	if err != nil {
 		return err
 	}
@@ -96,12 +94,6 @@ func (ns NodeStore) Get(name string) (entities.Node, error) {
 		return entities.Node{}, err
 	}
 
-	vars := entities.VarCollection{}
-	err = json.Unmarshal([]byte(n.Vars), &vars)
-	if err != nil {
-		return entities.Node{}, err
-	}
-
 	roles := []string{}
 	err = ns.db.Select(&roles, `SELECT r.name
 		                          FROM node_role nr
@@ -114,8 +106,13 @@ func (ns NodeStore) Get(name string) (entities.Node, error) {
 
 	node := entities.Node{
 		Name:  n.Name,
-		Vars:  vars,
+		Vars:  entities.VarCollection{},
 		Roles: roles,
+	}
+
+	err = node.Vars.Deserialize([]byte(n.Vars))
+	if err != nil {
+		return entities.Node{}, err
 	}
 
 	return node, nil

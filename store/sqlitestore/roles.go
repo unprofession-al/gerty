@@ -2,7 +2,6 @@ package sqlitestore
 
 import (
 	"database/sql"
-	"encoding/json"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/unprofession-al/gerty/entities"
@@ -18,7 +17,7 @@ func (rs RoleStore) Save(r entities.Role) error {
 	role := &Role{Name: r.Name}
 
 	// serialize vars
-	vars, err := json.Marshal(r.Vars)
+	vars, err := r.Vars.Serialize()
 	if err != nil {
 		return err
 	}
@@ -65,12 +64,6 @@ func (rs RoleStore) Get(name string) (entities.Role, error) {
 		return entities.Role{}, err
 	}
 
-	vars := entities.VarCollection{}
-	err = json.Unmarshal([]byte(r.Vars), &vars)
-	if err != nil {
-		return entities.Role{}, err
-	}
-
 	// SELECT '[\"' || GROUP_CONCAT(name,'\",\"') || '\"]' AS aoeua FROM role WHERE parent=1;
 	children := []string{}
 	err = rs.db.Select(&children, "SELECT name FROM role WHERE parent = $1;", r.ID)
@@ -80,9 +73,14 @@ func (rs RoleStore) Get(name string) (entities.Role, error) {
 
 	role := entities.Role{
 		Name:     r.Name,
-		Vars:     vars,
+		Vars:     entities.VarCollection{},
 		Parent:   r.ParentName,
 		Children: children,
+	}
+
+	err = role.Vars.Deserialize([]byte(r.Vars))
+	if err != nil {
+		return entities.Role{}, err
 	}
 
 	return role, nil

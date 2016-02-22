@@ -9,7 +9,7 @@ import (
 // VarBucket adds a name and a priority to a VarList.
 type VarBucket struct {
 	Name string                 `json:"name"`
-	Prio int                    `json:"prio"` // lower value means higher priority
+	Prio int                    `json:"prio"` // lower means higher priority
 	Vars map[string]interface{} `json:"vars"`
 }
 
@@ -24,8 +24,8 @@ func (v VarCollection) Len() int { return len(v) }
 // the sort interface.
 func (v VarCollection) Swap(i, j int) { v[i], v[j] = v[j], v[i] }
 
-// Less compares the order of two elements, part of implementing the sort interface.
-// The lower the value of `Prio` the higher the priority.
+// Less compares the order of two elements, part of implementing the sort
+// interface. The lower the value of `Prio` the higher the priority.
 func (v VarCollection) Less(i, j int) bool { return v[i].Prio > v[j].Prio }
 
 // Merge consolidates all variables devined in the VarBuckets. Buckets with the
@@ -48,8 +48,8 @@ func (v *VarCollection) Merge(src string) MergedVars {
 	return merged
 }
 
-// AddOrReplaceBucket adds a VarBucket to a collection. If a bucket with the same
-// name exists, the existing Bucket will be replaced.
+// AddOrReplaceBucket adds a VarBucket to a collection. If a bucket with
+// the same name exists, the existing Bucket will be replaced.
 func (v *VarCollection) AddOrReplaceBucket(b VarBucket) {
 	for i, bucket := range *v {
 		if bucket.Name == b.Name {
@@ -71,32 +71,39 @@ func (v *VarCollection) Deserialize(b []byte) error {
 	return json.Unmarshal(b, v)
 }
 
-// Merged holds a key/value representation of a variable as well as some meta data
-// about the variable.
+// Merged holds a key/value representation of a variable as well as some meta
+// data about the variable.
+//
+// Key:            key of the variable
+// Value:          value of the variable
+// Source:         name of the source where name usually represents the name
+//                 of the role/node containing the VarCollection
+// SourceBucket:   bucket name inside the containing VarCollection
+// Old:            reference to Merged representations of earlier states of
+//                 the same variable
+// Distance:       distance between the variable origin and the merging element
+//                 (generally an node)
+// Taitning:       if merging is unambiguous, the variable that tries to merge
+//                 later will be referenced as `tainting`
 type Merged struct {
-	// key of the variable
-	Key string
-	// value of the variable
-	Value interface{}
-	// name of the source where name usually represents the name of the role/node containing the VarCollection
-	Source string
-	// bucket name inside the containing VarCollection
-	SourceBucket string
-	// reference to Merged representations of earlier states of the same variable
-	Old *Merged
-	// distance metween the variable origin and the merging element (generally an node)
-	Distance int
-	// if merging is unambiguous, the variable that tries to merge later will be referenced as `tainting`
-	Tainting *Merged
+	Key          string      `json:"key"`
+	Value        interface{} `json:"Value"`
+	Source       string      `json:"source"`
+	SourceBucket string      `json:"source_bucket"`
+	Old          *Merged     `json:"old"`
+	Distance     int         `json:"distance"`
+	Tainting     *Merged     `json:"tainting"`
 }
 
 // String implements the `Stringer` interface for debugging reasons
 func (m Merged) String() string {
 	tainting := ""
 	if m.Tainting != nil {
-		tainting = fmt.Sprintf(", Tainting: `%s/%s`", m.Tainting.Source, m.Tainting.SourceBucket)
+		tainting = fmt.Sprintf(", Taint: `%s/%s`",
+			m.Tainting.Source, m.Tainting.SourceBucket)
 	}
-	return fmt.Sprintf("Key: `%s`, Value: {%s}, Source: `%s/%s`, Dist: %d%s \n", m.Key, m.Value, m.Source, m.SourceBucket, m.Distance, tainting)
+	return fmt.Sprintf("Key: '%s', Val: {%s}, Src: '%s/%s', Dist: %d%s \n",
+		m.Key, m.Value, m.Source, m.SourceBucket, m.Distance, tainting)
 }
 
 // MergedVars is a list of references to `Merged` elements
