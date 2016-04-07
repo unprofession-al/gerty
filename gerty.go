@@ -10,7 +10,7 @@ import (
 	"github.com/unprofession-al/gerty/entities"
 	mw "github.com/unprofession-al/gerty/middleware"
 	"github.com/unprofession-al/gerty/store"
-	_ "github.com/unprofession-al/gerty/store/memstore"
+	// _ "github.com/unprofession-al/gerty/store/memstore"
 	_ "github.com/unprofession-al/gerty/store/sqlitestore"
 )
 
