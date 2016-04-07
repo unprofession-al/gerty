@@ -33,9 +33,19 @@ func (rs RoleStore) Save(r entities.Role) error {
 		role.Parent = parentID
 	}
 
-	_, err = rs.db.NamedExec(`INSERT OR REPLACE INTO
-		role(name, vars, parent)
-		VALUES(:name, :vars, :parent);`, role)
+	// figure out if role already exists
+	err = rs.db.Get(&role.ID, "SELECT id FROM role WHERE name = $1;", r.Name)
+	if err == nil {
+		_, err = rs.db.NamedExec(`UPDATE role
+			SET name = :name,
+				vars = :vars,
+				parent = :parent
+		  WHERE id = :id;`, role)
+	} else {
+		_, err = rs.db.NamedExec(`INSERT INTO
+			role(name, vars, parent)
+			VALUES(:name, :vars, :parent);`, role)
+	}
 
 	return err
 }
@@ -43,10 +53,8 @@ func (rs RoleStore) Save(r entities.Role) error {
 // Delete deletes a given role.
 func (rs RoleStore) Delete(r entities.Role) error {
 	role := &Role{Name: r.Name}
-
 	_, err := rs.db.NamedExec(`DELETE FROM role
 		WHERE name = :name;`, role)
-
 	return err
 }
 
@@ -74,7 +82,7 @@ func (rs RoleStore) Get(name string) (entities.Role, error) {
 	role := entities.Role{
 		Name:     r.Name,
 		Vars:     entities.VarCollection{},
-		Parent:   r.ParentName,
+		Parent:   r.ParentName.String,
 		Children: children,
 	}
 
