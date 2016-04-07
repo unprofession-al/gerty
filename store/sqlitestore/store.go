@@ -53,6 +53,9 @@ type Role struct {
 	ParentName sql.NullString `db:"parent_name"`
 }
 
+// TODO: the ON DELETE RESTRICT part does somehow not work if the delete
+// is executed from the app itself. It only takes effect where a delete
+// is executed from a sqlite3 prompt with `PRAGMA foreign_keys = ON;`.
 var roleSchema = `CREATE TABLE IF NOT EXISTS role (
 	id     INTEGER PRIMARY KEY AUTOINCREMENT,
 	name   TEXT UNIQUE NOT NULL,
