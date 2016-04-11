@@ -7,6 +7,7 @@ func init() {
 		"AddNode":            route{p: "/nodes/{node}", m: "POST", h: addNode},
 		"DelNode":            route{p: "/nodes/{node}", m: "DELETE", h: delNode},
 		"AddNodeVars":        route{p: "/nodes/{node}/vars", m: "POST", h: addNodeVars},
+		"ReplaceNodeVars":    route{p: "/nodes/{node}/vars", m: "PUT", h: replaceNodeVars},
 		"GetNodeVars":        route{p: "/nodes/{node}/vars", m: "GET", h: getNodeVars},
 		"LinkNodeToRole":     route{p: "/nodes/{node}/roles/{role}", m: "POST", h: linkNodeToRole},
 		"UnlinkNodeFromRole": route{p: "/nodes/{node}/roles/{role}", m: "DELETE", h: unlinkNodeFromRole},

@@ -107,7 +107,7 @@ func addRoleVars(res http.ResponseWriter, req *http.Request) {
 	}
 
 	var roleVars map[string]interface{}
-	err = parseBody(req, &roleVars)
+	err = parseBodyAsMap(req, &roleVars)
 	if err != nil {
 		respond(res, req, http.StatusInternalServerError, err.Error())
 		return

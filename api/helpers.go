@@ -47,7 +47,7 @@ func respond(res http.ResponseWriter, req *http.Request, code int, data interfac
 // parseBody reads the payload of a request and formats unmarshals it
 // accoding to the format specified in the 'd' url parameter ('d' stands
 // for 'data'). Default format is json.
-func parseBody(req *http.Request, s interface{}) error {
+func parseBodyAsMap(req *http.Request, s interface{}) error {
 	d := "json"
 	format := req.URL.Query()["d"]
 	if len(format) > 0 {

@@ -77,7 +77,7 @@ func addNodeVars(res http.ResponseWriter, req *http.Request) {
 	}
 
 	var nodeVars map[string]interface{}
-	err = parseBody(req, &nodeVars)
+	err = parseBodyAsMap(req, &nodeVars)
 	if err != nil {
 		respond(res, req, http.StatusInternalServerError, err.Error())
 		return
@@ -112,6 +112,47 @@ func getNodeVars(res http.ResponseWriter, req *http.Request) {
 	out := ni.GetVars(node)
 
 	respond(res, req, http.StatusOK, out)
+}
+
+func replaceNodeVars(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+
+	node, err := ni.Get(vars["node"])
+	if err != nil {
+		respond(res, req, http.StatusNotFound, err.Error())
+		return
+	}
+
+	var nodeVars map[string]interface{}
+	err = parseBodyAsMap(req, &nodeVars)
+	if err != nil {
+		respond(res, req, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	vb := entities.VarBucket{
+		Prio: 0,
+		Name: "native",
+	}
+	for _, b := range node.Vars {
+		if b.Name == "native" {
+			vb = b
+		}
+	}
+
+	for key, val := range nodeVars {
+		vb.Vars[key] = val
+	}
+
+	node.Vars.AddOrReplaceBucket(vb)
+
+	err = ni.Save(node)
+	if err != nil {
+		respond(res, req, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	respond(res, req, http.StatusOK, node)
 }
 
 func linkNodeToRole(res http.ResponseWriter, req *http.Request) {

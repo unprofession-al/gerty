@@ -87,7 +87,7 @@ func (v *VarCollection) Deserialize(b []byte) error {
 //                 later will be referenced as `tainting`
 type Merged struct {
 	Key          string      `json:"key"`
-	Value        interface{} `json:"Value"`
+	Value        interface{} `json:"value"`
 	Source       string      `json:"source"`
 	SourceBucket string      `json:"source_bucket"`
 	Old          *Merged     `json:"old"`
