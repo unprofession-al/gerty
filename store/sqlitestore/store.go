@@ -51,6 +51,7 @@ type Role struct {
 	Vars       string         `db:"vars"`
 	Parent     sql.NullInt64  `db:"parent"`
 	ParentName sql.NullString `db:"parent_name"`
+	Children   []string
 }
 
 // TODO: the ON DELETE RESTRICT part does somehow not work if the delete

@@ -40,3 +40,12 @@ func (rs RoleStore) List() ([]string, error) {
 	}
 	return out, nil
 }
+
+// Checks if parent role is populated because of root role or manually linked
+func (rs RoleStore) HasParent(r entities.Role) bool {
+	if _, ok := rs.roles[r.Parent]; ok {
+		return true
+	} else {
+		return false
+	}
+}

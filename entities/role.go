@@ -17,6 +17,7 @@ type RoleStore interface {
 	Save(r Role) error
 	Delete(r Role) error
 	Get(name string) (Role, error)
+	HasParent(r Role) bool
 	List() ([]string, error)
 }
 
@@ -31,18 +32,22 @@ func NewRoleInteractor(roles RoleStore) RoleInteractor {
 	return RoleInteractor{RoleStore: roles}
 }
 
-// LinkChild adds a given role to the current roles children.
-func (ri RoleInteractor) LinkChild(role *Role, child *Role) error {
-	if ri.checkCircularReflexion(*role, *child) {
+// LinkParent adds a given role to the current roles children.
+func (ri RoleInteractor) LinkParent(role *Role, parent *Role) error {
+	if ri.checkCircularReflexion(*parent, *role) {
 		return errors.New("cannot add, this would create a circular reflection")
 	}
-	if child.Parent != "" {
-		return errors.New("child already has parent")
+	if ri.HasParent(*role) {
+		return errors.New("already has parent")
 	}
-	role.Children = append(role.Children, child.Name)
-	ri.Save(*role)
-	child.Parent = role.Name
-	ri.Save(*child)
+	role.Parent = parent.Name
+	err := ri.Save(*role)
+	if err != nil {
+		return err
+	}
+	// TODO: make sure only parents are linked on Children on Store level.
+	parent.Children = append(parent.Children, role.Name)
+	ri.Save(*parent)
 	return nil
 }
 
@@ -61,6 +66,7 @@ func (ri RoleInteractor) checkCircularReflexion(role Role, child Role) bool {
 }
 
 // UnlinkChild removes a given role from the current roles children.
+// TODO: Refactor to UnlinkParent in order to be consistent with LinkParent()
 func (ri RoleInteractor) UnlinkChild(role *Role, child *Role) error {
 	for i, cName := range role.Children {
 		c, err := ri.Get(cName)
@@ -70,6 +76,7 @@ func (ri RoleInteractor) UnlinkChild(role *Role, child *Role) error {
 		if c.Name == child.Name {
 			child.Parent = ""
 			ri.Save(*child)
+			// TODO: make sure only parents are linked on Children on Store level.
 			role.Children = append(role.Children[:i], role.Children[i+1:]...)
 			ri.Save(*role)
 			return nil

@@ -54,6 +54,14 @@ func (rs RoleStoreMock) Get(name string) (Role, error) {
 	return role, nil
 }
 
+func (rs RoleStoreMock) HasParent(r Role) bool {
+	if _, ok := rs.roles[r.Parent]; ok {
+		return true
+	} else {
+		return false
+	}
+}
+
 func (rs RoleStoreMock) List() ([]string, error) {
 	out := []string{}
 	for name := range rs.roles {

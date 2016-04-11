@@ -28,7 +28,7 @@ func TestRoleAddChildToParent(t *testing.T) {
 	c := Role{Name: "Child"}
 	ri.Save(c)
 
-	err := ri.LinkChild(&p, &c)
+	err := ri.LinkParent(&c, &p)
 	if err != nil {
 		t.Error("child not added to parent")
 	}
@@ -64,10 +64,10 @@ func TestRoleCreateCircle(t *testing.T) {
 	c2 := Role{Name: "Child Level 2"}
 	ri.Save(c2)
 
-	ri.LinkChild(&p, &c1)
-	ri.LinkChild(&c1, &c2)
+	ri.LinkParent(&c1, &p)
+	ri.LinkParent(&c2, &c1)
 
-	err := ri.LinkChild(&c2, &p)
+	err := ri.LinkParent(&p, &c2)
 	if err == nil {
 		t.Error("circular reflecton created")
 	}
@@ -85,9 +85,9 @@ func TestRoleMultipleParents(t *testing.T) {
 	c := Role{Name: "Child 1"}
 	ri.Save(c)
 
-	ri.LinkChild(&p1, &c)
+	ri.LinkParent(&c, &p1)
 
-	err := ri.LinkChild(&p2, &c)
+	err := ri.LinkParent(&c, &p2)
 	if err == nil {
 		t.Error("child with parent added to new parent")
 	}
@@ -102,7 +102,7 @@ func TestRoleDeleteChildFromParent(t *testing.T) {
 	c := Role{Name: "Child"}
 	ri.Save(c)
 
-	ri.LinkChild(&p, &c)
+	ri.LinkParent(&c, &p)
 
 	err := ri.UnlinkChild(&p, &c)
 	if err != nil {
@@ -133,7 +133,7 @@ func TestRoleDeleteUnrelatedChild(t *testing.T) {
 	c2 := Role{Name: "Child Level 2"}
 	ri.Save(c2)
 
-	ri.LinkChild(&p, &c1)
+	ri.LinkParent(&c1, &p)
 	err := ri.UnlinkChild(&p, &c2)
 	if err == nil {
 		t.Error("removing a node from another node that is not related as parent shuld be impossible")
@@ -152,8 +152,8 @@ func TestRoleCalculateDepth(t *testing.T) {
 	c2 := Role{Name: "Child Level 2"}
 	ri.Save(c2)
 
-	ri.LinkChild(&p, &c1)
-	ri.LinkChild(&c1, &c2)
+	ri.LinkParent(&c1, &p)
+	ri.LinkParent(&c2, &c1)
 
 	if ri.Depth(c2) != 2 {
 		t.Error("depth not calculated correctly")
@@ -169,14 +169,14 @@ func TestRoleSort(t *testing.T) {
 	ri.Save(c11)
 	c12 := Role{Name: "C Child 1 Level 2"}
 	ri.Save(c12)
-	ri.LinkChild(&p1, &c11)
-	ri.LinkChild(&c11, &c12)
+	ri.LinkParent(&c11, &p1)
+	ri.LinkParent(&c12, &c11)
 
 	p2 := Role{Name: "B Parent 2"}
 	ri.Save(p2)
 	c21 := Role{Name: "B Child 2 Level 1"}
 	ri.Save(c21)
-	ri.LinkChild(&p2, &c21)
+	ri.LinkParent(&c21, &p2)
 
 	p3 := Role{Name: "A Parent 3"}
 	ri.Save(p3)
@@ -184,8 +184,8 @@ func TestRoleSort(t *testing.T) {
 	ri.Save(c31)
 	c32 := Role{Name: "A Child 3 Level 2"}
 	ri.Save(c32)
-	ri.LinkChild(&p3, &c31)
-	ri.LinkChild(&c31, &c32)
+	ri.LinkParent(&c31, &p3)
+	ri.LinkParent(&c32, &c31)
 
 	expected := map[int]string{
 		0: "A Child 3 Level 2",

@@ -191,13 +191,13 @@ func TestNodeMerging(t *testing.T) {
 		ri.Save(*role)
 	}
 
-	ri.LinkChild(r["a"], r["b"])
-	ri.LinkChild(r["a"], r["c"])
-	ri.LinkChild(r["b"], r["d"])
-	ri.LinkChild(r["b"], r["e"])
-	ri.LinkChild(r["c"], r["f"])
-	ri.LinkChild(r["d"], r["g"])
-	ri.LinkChild(r["d"], r["h"])
+	ri.LinkParent(r["b"], r["a"])
+	ri.LinkParent(r["c"], r["a"])
+	ri.LinkParent(r["d"], r["b"])
+	ri.LinkParent(r["e"], r["b"])
+	ri.LinkParent(r["f"], r["c"])
+	ri.LinkParent(r["g"], r["d"])
+	ri.LinkParent(r["h"], r["d"])
 
 	ni := NewNodeInteractor(NodeStoreMock{nodes: make(map[string]Node)}, ri)
 

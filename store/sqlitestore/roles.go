@@ -2,10 +2,14 @@ package sqlitestore
 
 import (
 	"database/sql"
+	"errors"
+	"fmt"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/unprofession-al/gerty/entities"
 )
+
+const rootRoleName = "all"
 
 // RoleStore implements the entities.RoleStore interface.
 type RoleStore struct {
@@ -22,6 +26,11 @@ func (rs RoleStore) Save(r entities.Role) error {
 		return err
 	}
 	role.Vars = string(vars)
+
+	if r.Parent != "" && r.Name == rootRoleName {
+		fmt.Println("eee")
+		return errors.New("Cannot add parent role to root role")
+	}
 
 	// get id of parent role
 	var parentID sql.NullInt64
@@ -73,8 +82,12 @@ func (rs RoleStore) Get(name string) (entities.Role, error) {
 	}
 
 	// SELECT '[\"' || GROUP_CONCAT(name,'\",\"') || '\"]' AS aoeua FROM role WHERE parent=1;
-	children := []string{}
-	err = rs.db.Select(&children, "SELECT name FROM role WHERE parent = $1;", r.ID)
+	err = rs.db.Select(&r.Children, "SELECT name FROM role WHERE parent = $1;", r.ID)
+	if err != nil {
+		return entities.Role{}, err
+	}
+
+	err = r.populateRootRole(rs)
 	if err != nil {
 		return entities.Role{}, err
 	}
@@ -83,7 +96,7 @@ func (rs RoleStore) Get(name string) (entities.Role, error) {
 		Name:     r.Name,
 		Vars:     entities.VarCollection{},
 		Parent:   r.ParentName.String,
-		Children: children,
+		Children: r.Children,
 	}
 
 	err = role.Vars.Deserialize([]byte(r.Vars))
@@ -94,6 +107,30 @@ func (rs RoleStore) Get(name string) (entities.Role, error) {
 	return role, nil
 }
 
+func (r *Role) populateRootRole(rs RoleStore) error {
+	// Check if rootRole exisits in database
+	var rr int
+	err := rs.db.Get(&rr, "SELECT id FROM role WHERE name = $1;", rootRoleName)
+	if err != nil {
+		return nil
+	}
+
+	if r.ParentName.Valid == false && r.Name != rootRoleName {
+		// add all as parent
+		r.ParentName.String = rootRoleName
+		r.ParentName.Valid = true
+	} else if r.Name == rootRoleName {
+		// add all roles without parent as children
+		children := []string{}
+		err = rs.db.Select(&children, "SELECT name FROM role WHERE parent IS NULL AND id != $1", rr)
+		if err != nil {
+			return err
+		}
+		r.Children = append(r.Children, children...)
+	}
+	return nil
+}
+
 // List returns a list of persisted roles by their names.
 func (rs RoleStore) List() ([]string, error) {
 	out := []string{}
@@ -101,4 +138,13 @@ func (rs RoleStore) List() ([]string, error) {
 	err := rs.db.Select(&out, "SELECT name FROM role;")
 
 	return out, err
+}
+
+// Delete deletes a given role.
+func (rs RoleStore) HasParent(r entities.Role) bool {
+	if r.Parent == rootRoleName {
+		return false
+	} else {
+		return true
+	}
 }
