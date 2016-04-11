@@ -10,6 +10,7 @@ import (
 	"github.com/unprofession-al/gerty/entities"
 	mw "github.com/unprofession-al/gerty/middleware"
 	"github.com/unprofession-al/gerty/store"
+	"github.com/unprofession-al/gerty/transformers"
 	// _ "github.com/unprofession-al/gerty/store/memstore"
 	_ "github.com/unprofession-al/gerty/store/sqlitestore"
 )
@@ -23,11 +24,15 @@ func main() {
 	ri := entities.NewRoleInteractor(s.Roles)
 	ni := entities.NewNodeInteractor(s.Nodes, ri)
 
-	api.InjectAPI(ni, ri)
-
 	r := mux.NewRouter().StrictSlash(true)
+
+	api.Inject(ni, ri)
 	a := r.PathPrefix("/api/").Subrouter()
 	api.PopulateRouter(a)
+
+	transformers.Inject(ni, ri)
+	t := r.PathPrefix("/transformers/").Subrouter()
+	transformers.PopulateRouter(t)
 
 	chain := alice.New(mw.RecoverPanic, mw.UserContext).Then(r)
 
