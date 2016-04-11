@@ -5,16 +5,17 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/unprofession-al/gerty/entities"
+	"github.com/unprofession-al/gerty/helpers"
 )
 
 func listNodes(res http.ResponseWriter, req *http.Request) {
 	out, err := ni.List()
 	if err != nil {
-		respond(res, req, http.StatusInternalServerError, err.Error())
+		helpers.Respond(res, req, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	respond(res, req, http.StatusOK, out)
+	helpers.Respond(res, req, http.StatusOK, out)
 }
 
 func getNode(res http.ResponseWriter, req *http.Request) {
@@ -22,11 +23,11 @@ func getNode(res http.ResponseWriter, req *http.Request) {
 
 	node, err := ni.Get(vars["node"])
 	if err != nil {
-		respond(res, req, http.StatusNotFound, err.Error())
+		helpers.Respond(res, req, http.StatusNotFound, err.Error())
 		return
 	}
 
-	respond(res, req, http.StatusCreated, node)
+	helpers.Respond(res, req, http.StatusCreated, node)
 }
 
 func addNode(res http.ResponseWriter, req *http.Request) {
@@ -34,7 +35,7 @@ func addNode(res http.ResponseWriter, req *http.Request) {
 
 	node, err := ni.Get(vars["node"])
 	if err == nil {
-		respond(res, req, http.StatusConflict, "already exists")
+		helpers.Respond(res, req, http.StatusConflict, "already exists")
 		return
 	}
 
@@ -42,11 +43,11 @@ func addNode(res http.ResponseWriter, req *http.Request) {
 
 	err = ni.Save(node)
 	if err != nil {
-		respond(res, req, http.StatusInternalServerError, err.Error())
+		helpers.Respond(res, req, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	respond(res, req, http.StatusCreated, node)
+	helpers.Respond(res, req, http.StatusCreated, node)
 }
 
 func delNode(res http.ResponseWriter, req *http.Request) {
@@ -54,17 +55,17 @@ func delNode(res http.ResponseWriter, req *http.Request) {
 
 	node, err := ni.Get(vars["node"])
 	if err != nil {
-		respond(res, req, http.StatusNotFound, err.Error())
+		helpers.Respond(res, req, http.StatusNotFound, err.Error())
 		return
 	}
 
 	err = ni.Delete(node)
 	if err != nil {
-		respond(res, req, http.StatusInternalServerError, err.Error())
+		helpers.Respond(res, req, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	respond(res, req, http.StatusOK, "deleted")
+	helpers.Respond(res, req, http.StatusOK, "deleted")
 }
 
 func addNodeVars(res http.ResponseWriter, req *http.Request) {
@@ -72,14 +73,14 @@ func addNodeVars(res http.ResponseWriter, req *http.Request) {
 
 	node, err := ni.Get(vars["node"])
 	if err != nil {
-		respond(res, req, http.StatusNotFound, err.Error())
+		helpers.Respond(res, req, http.StatusNotFound, err.Error())
 		return
 	}
 
 	var nodeVars map[string]interface{}
-	err = parseBodyAsMap(req, &nodeVars)
+	err = helpers.ParseBodyAsMap(req, &nodeVars)
 	if err != nil {
-		respond(res, req, http.StatusInternalServerError, err.Error())
+		helpers.Respond(res, req, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -93,11 +94,11 @@ func addNodeVars(res http.ResponseWriter, req *http.Request) {
 
 	err = ni.Save(node)
 	if err != nil {
-		respond(res, req, http.StatusInternalServerError, err.Error())
+		helpers.Respond(res, req, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	respond(res, req, http.StatusCreated, node)
+	helpers.Respond(res, req, http.StatusCreated, node)
 }
 
 func getNodeVars(res http.ResponseWriter, req *http.Request) {
@@ -105,13 +106,13 @@ func getNodeVars(res http.ResponseWriter, req *http.Request) {
 
 	node, err := ni.Get(vars["node"])
 	if err != nil {
-		respond(res, req, http.StatusNotFound, err.Error())
+		helpers.Respond(res, req, http.StatusNotFound, err.Error())
 		return
 	}
 
 	out := ni.GetVars(node)
 
-	respond(res, req, http.StatusOK, out)
+	helpers.Respond(res, req, http.StatusOK, out)
 }
 
 func replaceNodeVars(res http.ResponseWriter, req *http.Request) {
@@ -119,14 +120,14 @@ func replaceNodeVars(res http.ResponseWriter, req *http.Request) {
 
 	node, err := ni.Get(vars["node"])
 	if err != nil {
-		respond(res, req, http.StatusNotFound, err.Error())
+		helpers.Respond(res, req, http.StatusNotFound, err.Error())
 		return
 	}
 
 	var nodeVars map[string]interface{}
-	err = parseBodyAsMap(req, &nodeVars)
+	err = helpers.ParseBodyAsMap(req, &nodeVars)
 	if err != nil {
-		respond(res, req, http.StatusInternalServerError, err.Error())
+		helpers.Respond(res, req, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -148,11 +149,11 @@ func replaceNodeVars(res http.ResponseWriter, req *http.Request) {
 
 	err = ni.Save(node)
 	if err != nil {
-		respond(res, req, http.StatusInternalServerError, err.Error())
+		helpers.Respond(res, req, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	respond(res, req, http.StatusOK, node)
+	helpers.Respond(res, req, http.StatusOK, node)
 }
 
 func linkNodeToRole(res http.ResponseWriter, req *http.Request) {
@@ -161,19 +162,19 @@ func linkNodeToRole(res http.ResponseWriter, req *http.Request) {
 	node := entities.Node{Name: vars["node"]}
 	node, err := ni.Get(vars["node"])
 	if err != nil {
-		respond(res, req, http.StatusNotFound, err.Error())
+		helpers.Respond(res, req, http.StatusNotFound, err.Error())
 		return
 	}
 
 	role, err := ri.Get(vars["role"])
 	if err != nil {
-		respond(res, req, http.StatusNotFound, err.Error())
+		helpers.Respond(res, req, http.StatusNotFound, err.Error())
 		return
 	}
 
 	for _, roleName := range node.Roles {
 		if roleName == role.Name {
-			respond(res, req, http.StatusNotModified, node)
+			helpers.Respond(res, req, http.StatusNotModified, node)
 			return
 		}
 	}
@@ -182,11 +183,11 @@ func linkNodeToRole(res http.ResponseWriter, req *http.Request) {
 
 	err = ni.Save(node)
 	if err != nil {
-		respond(res, req, http.StatusInternalServerError, err.Error())
+		helpers.Respond(res, req, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	respond(res, req, http.StatusCreated, node)
+	helpers.Respond(res, req, http.StatusCreated, node)
 }
 
 func unlinkNodeFromRole(res http.ResponseWriter, req *http.Request) {
@@ -195,13 +196,13 @@ func unlinkNodeFromRole(res http.ResponseWriter, req *http.Request) {
 	node := entities.Node{Name: vars["node"]}
 	node, err := ni.Get(vars["node"])
 	if err != nil {
-		respond(res, req, http.StatusNotFound, err.Error())
+		helpers.Respond(res, req, http.StatusNotFound, err.Error())
 		return
 	}
 
 	role, err := ri.Get(vars["role"])
 	if err != nil {
-		respond(res, req, http.StatusNotFound, err.Error())
+		helpers.Respond(res, req, http.StatusNotFound, err.Error())
 		return
 	}
 
@@ -214,9 +215,9 @@ func unlinkNodeFromRole(res http.ResponseWriter, req *http.Request) {
 
 	err = ni.Save(node)
 	if err != nil {
-		respond(res, req, http.StatusInternalServerError, err.Error())
+		helpers.Respond(res, req, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	respond(res, req, http.StatusOK, node)
+	helpers.Respond(res, req, http.StatusOK, node)
 }

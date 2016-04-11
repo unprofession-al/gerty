@@ -5,16 +5,17 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/unprofession-al/gerty/entities"
+	"github.com/unprofession-al/gerty/helpers"
 )
 
 func listRoles(res http.ResponseWriter, req *http.Request) {
 	out, err := ri.List()
 	if err != nil {
-		respond(res, req, http.StatusNotFound, err.Error())
+		helpers.Respond(res, req, http.StatusNotFound, err.Error())
 		return
 	}
 
-	respond(res, req, http.StatusOK, out)
+	helpers.Respond(res, req, http.StatusOK, out)
 }
 
 func getRole(res http.ResponseWriter, req *http.Request) {
@@ -22,11 +23,11 @@ func getRole(res http.ResponseWriter, req *http.Request) {
 
 	role, err := ri.Get(vars["role"])
 	if err != nil {
-		respond(res, req, http.StatusNotFound, err.Error())
+		helpers.Respond(res, req, http.StatusNotFound, err.Error())
 		return
 	}
 
-	respond(res, req, http.StatusOK, role)
+	helpers.Respond(res, req, http.StatusOK, role)
 }
 
 func addRole(res http.ResponseWriter, req *http.Request) {
@@ -34,7 +35,7 @@ func addRole(res http.ResponseWriter, req *http.Request) {
 
 	role, err := ri.Get(vars["role"])
 	if err == nil {
-		respond(res, req, http.StatusConflict, "already exists")
+		helpers.Respond(res, req, http.StatusConflict, "already exists")
 		return
 	}
 
@@ -42,11 +43,11 @@ func addRole(res http.ResponseWriter, req *http.Request) {
 
 	err = ri.Save(role)
 	if err != nil {
-		respond(res, req, http.StatusInternalServerError, err.Error())
+		helpers.Respond(res, req, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	respond(res, req, http.StatusCreated, role)
+	helpers.Respond(res, req, http.StatusCreated, role)
 }
 
 func delRole(res http.ResponseWriter, req *http.Request) {
@@ -54,7 +55,7 @@ func delRole(res http.ResponseWriter, req *http.Request) {
 
 	role, err := ri.Get(vars["role"])
 	if err != nil {
-		respond(res, req, http.StatusNotFound, err.Error())
+		helpers.Respond(res, req, http.StatusNotFound, err.Error())
 		return
 	}
 
@@ -64,13 +65,13 @@ func delRole(res http.ResponseWriter, req *http.Request) {
 	if role.Parent != "" {
 		parent, err := ri.Get(role.Parent)
 		if err != nil {
-			respond(res, req, http.StatusNotFound, err.Error())
+			helpers.Respond(res, req, http.StatusNotFound, err.Error())
 			return
 		}
 
 		err = ri.UnlinkChild(&parent, &role)
 		if err != nil {
-			respond(res, req, http.StatusInternalServerError, err.Error())
+			helpers.Respond(res, req, http.StatusInternalServerError, err.Error())
 			return
 		}
 	}
@@ -78,23 +79,23 @@ func delRole(res http.ResponseWriter, req *http.Request) {
 	for _, childName := range role.Children {
 		child, err := ri.Get(childName)
 		if err != nil {
-			respond(res, req, http.StatusNotFound, err.Error())
+			helpers.Respond(res, req, http.StatusNotFound, err.Error())
 			return
 		}
 
 		err = ri.UnlinkChild(&role, &child)
 		if err != nil {
-			respond(res, req, http.StatusInternalServerError, err.Error())
+			helpers.Respond(res, req, http.StatusInternalServerError, err.Error())
 			return
 		}
 	}
 
 	err = ri.Delete(role)
 	if err != nil {
-		respond(res, req, http.StatusInternalServerError, err.Error())
+		helpers.Respond(res, req, http.StatusInternalServerError, err.Error())
 		return
 	}
-	respond(res, req, http.StatusOK, "deleted")
+	helpers.Respond(res, req, http.StatusOK, "deleted")
 }
 
 func addRoleVars(res http.ResponseWriter, req *http.Request) {
@@ -102,14 +103,14 @@ func addRoleVars(res http.ResponseWriter, req *http.Request) {
 
 	role, err := ri.Get(vars["role"])
 	if err != nil {
-		respond(res, req, http.StatusNotFound, err.Error())
+		helpers.Respond(res, req, http.StatusNotFound, err.Error())
 		return
 	}
 
 	var roleVars map[string]interface{}
-	err = parseBodyAsMap(req, &roleVars)
+	err = helpers.ParseBodyAsMap(req, &roleVars)
 	if err != nil {
-		respond(res, req, http.StatusInternalServerError, err.Error())
+		helpers.Respond(res, req, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -123,11 +124,11 @@ func addRoleVars(res http.ResponseWriter, req *http.Request) {
 
 	err = ri.Save(role)
 	if err != nil {
-		respond(res, req, http.StatusInternalServerError, err.Error())
+		helpers.Respond(res, req, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	respond(res, req, http.StatusCreated, role)
+	helpers.Respond(res, req, http.StatusCreated, role)
 }
 
 func addRoleParent(res http.ResponseWriter, req *http.Request) {
@@ -135,23 +136,23 @@ func addRoleParent(res http.ResponseWriter, req *http.Request) {
 
 	role, err := ri.Get(vars["role"])
 	if err != nil {
-		respond(res, req, http.StatusNotFound, err.Error())
+		helpers.Respond(res, req, http.StatusNotFound, err.Error())
 		return
 	}
 
 	parent, err := ri.Get(vars["parent"])
 	if err != nil {
-		respond(res, req, http.StatusNotFound, err.Error())
+		helpers.Respond(res, req, http.StatusNotFound, err.Error())
 		return
 	}
 
-	err = ri.LinkChild(&parent, &role)
+	err = ri.LinkParent(&role, &parent)
 	if err != nil {
-		respond(res, req, http.StatusInternalServerError, err.Error())
+		helpers.Respond(res, req, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	respond(res, req, http.StatusOK, role.Parent)
+	helpers.Respond(res, req, http.StatusOK, role.Parent)
 }
 
 func delRoleParent(res http.ResponseWriter, req *http.Request) {
@@ -159,21 +160,21 @@ func delRoleParent(res http.ResponseWriter, req *http.Request) {
 
 	role, err := ri.Get(vars["role"])
 	if err != nil {
-		respond(res, req, http.StatusNotFound, err.Error())
+		helpers.Respond(res, req, http.StatusNotFound, err.Error())
 		return
 	}
 
 	parent, err := ri.Get(role.Parent)
 	if err != nil {
-		respond(res, req, http.StatusNotFound, err.Error())
+		helpers.Respond(res, req, http.StatusNotFound, err.Error())
 		return
 	}
 
 	err = ri.UnlinkChild(&parent, &role)
 	if err != nil {
-		respond(res, req, http.StatusInternalServerError, err.Error())
+		helpers.Respond(res, req, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	respond(res, req, http.StatusOK, "unlinked")
+	helpers.Respond(res, req, http.StatusOK, "unlinked")
 }

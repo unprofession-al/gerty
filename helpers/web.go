@@ -1,4 +1,4 @@
-package api
+package helpers
 
 import (
 	"encoding/json"
@@ -13,7 +13,7 @@ import (
 
 // respond reads the 'f' url parameter ('f' stands for 'format'), formats the given data
 // accordingly and sets the required content-type header. Default format is json.
-func respond(res http.ResponseWriter, req *http.Request, code int, data interface{}) {
+func Respond(res http.ResponseWriter, req *http.Request, code int, data interface{}) {
 	var err error
 	var errMesg []byte
 	var out []byte
@@ -47,7 +47,7 @@ func respond(res http.ResponseWriter, req *http.Request, code int, data interfac
 // parseBody reads the payload of a request and formats unmarshals it
 // accoding to the format specified in the 'd' url parameter ('d' stands
 // for 'data'). Default format is json.
-func parseBodyAsMap(req *http.Request, s interface{}) error {
+func ParseBodyAsMap(req *http.Request, s interface{}) error {
 	d := "json"
 	format := req.URL.Query()["d"]
 	if len(format) > 0 {
