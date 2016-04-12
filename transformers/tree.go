@@ -12,6 +12,7 @@ import (
 type treeNode struct {
 	Name     string      `json:"name"`
 	Children []*treeNode `json:"children"`
+	Type     string      `json:"type"`
 }
 
 func treeRenderer(res http.ResponseWriter, req *http.Request) {
@@ -36,6 +37,14 @@ func treeRenderer(res http.ResponseWriter, req *http.Request) {
 
 func addToTree(current entities.Role, t *treeNode) {
 	t.Name = current.Name
+	t.Type = "role"
+	for _, host := range current.Hosts {
+		h := &treeNode{
+			Name: host,
+			Type: "host",
+		}
+		t.Children = append(t.Children, h)
+	}
 	for _, child := range current.Children {
 		role, _ := ri.Get(child)
 
@@ -67,8 +76,13 @@ func treeIndex(res http.ResponseWriter, req *http.Request) {
   stroke-width: 1.5px;
 }
 
-.node text {
+.role {
   font: 10px sans-serif;
+}
+
+.host{
+  font: 10px sans-serif;
+  font-style: italic;
 }
 
 .link {
@@ -148,9 +162,10 @@ function update(source) {
 
   nodeEnter.append("text")
       .attr("x", function(d) { return d.children || d._children ? -10 : 10; })
+      .attr("class", function(d) { return d.type == "host" ? "host" : "role"; })
       .attr("dy", ".35em")
       .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
-      .text(function(d) { return d.name; })
+      .text(function(d) { return d.name })
       .style("fill-opacity", 1e-6);
 
   // Transition nodes to their new position.
