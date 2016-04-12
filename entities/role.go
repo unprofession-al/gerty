@@ -9,6 +9,7 @@ type Role struct {
 	Vars     VarCollection `json:"vars"`
 	Parent   string        `json:"parent"`
 	Children []string      `json:"childern"`
+	Hosts    []string      `json:"hosts"`
 }
 
 // RoleStore needs to be implenented by the store package. It provides access

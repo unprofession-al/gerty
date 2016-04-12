@@ -81,6 +81,15 @@ func (rs RoleStore) Get(name string) (entities.Role, error) {
 		return entities.Role{}, err
 	}
 
+	err = rs.db.Select(&r.Hosts, `SELECT n.name
+		                          FROM node_role nr
+		               LEFT OUTER JOIN node n
+			      				    ON nr.node_id = n.id
+		                         WHERE nr.role_id = $1;`, r.ID)
+	if err != nil {
+		return entities.Role{}, err
+	}
+
 	// SELECT '[\"' || GROUP_CONCAT(name,'\",\"') || '\"]' AS aoeua FROM role WHERE parent=1;
 	err = rs.db.Select(&r.Children, "SELECT name FROM role WHERE parent = $1;", r.ID)
 	if err != nil {
@@ -97,6 +106,7 @@ func (rs RoleStore) Get(name string) (entities.Role, error) {
 		Vars:     entities.VarCollection{},
 		Parent:   r.ParentName.String,
 		Children: r.Children,
+		Hosts:    r.Hosts,
 	}
 
 	err = role.Vars.Deserialize([]byte(r.Vars))
