@@ -19,5 +19,7 @@ func init() {
 		"AddRoleVars":   route{p: "/roles/{role}/vars", m: "POST", h: addRoleVars},
 		"AddRoleParent": route{p: "/roles/{role}/parent/{parent}", m: "POST", h: addRoleParent},
 		"DelRoleParent": route{p: "/roles/{role}/parent", m: "DELETE", h: delRoleParent},
+
+		"WhoAmI": route{p: "/system/whoami", m: "get", h: whoAmI},
 	}
 }
