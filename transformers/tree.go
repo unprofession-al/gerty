@@ -36,7 +36,7 @@ func treeRenderer(res http.ResponseWriter, req *http.Request) {
 func addToTree(current entities.Role, t *treeNode) {
 	t.Name = current.Name
 	t.Type = "role"
-	for _, host := range current.Hosts {
+	for _, host := range current.Nodes {
 		h := &treeNode{
 			Name: host,
 			Type: "host",

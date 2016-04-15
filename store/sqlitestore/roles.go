@@ -106,7 +106,7 @@ func (rs RoleStore) Get(name string) (entities.Role, error) {
 		Vars:     entities.VarCollection{},
 		Parent:   r.ParentName.String,
 		Children: r.Children,
-		Hosts:    r.Hosts,
+		Nodes:    r.Hosts,
 	}
 
 	err = role.Vars.Deserialize([]byte(r.Vars))
