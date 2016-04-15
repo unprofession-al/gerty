@@ -12,7 +12,7 @@ type AnsibleGroup struct {
 	Hosts    []string                          `json:"hosts,omitempty" yaml:"hosts,omitempty"`
 	Vars     map[string]interface{}            `json:"vars,omitempty" yaml:"vars,omitempty"`
 	Hostvars map[string]map[string]interface{} `json:"hostvars,omitempty" yaml:"hostvars,omitempty"`
-	Children []string                          `json:"childern,omitempty" yaml:"childern,omitempty"`
+	Children []string                          `json:"children,omitempty" yaml:"children,omitempty"`
 }
 
 func NewAnsibleInventory() (*AnsibleInventory, error) {
