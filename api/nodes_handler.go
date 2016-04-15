@@ -115,6 +115,30 @@ func getNodeVars(res http.ResponseWriter, req *http.Request) {
 	helpers.Respond(res, req, http.StatusOK, out)
 }
 
+func getNodeVar(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+
+	node, err := ni.Get(vars["node"])
+	if err != nil {
+		helpers.Respond(res, req, http.StatusNotFound, err.Error())
+		return
+	}
+
+	nvs := ni.GetVars(node)
+
+	var out interface{}
+
+	for _, nv := range nvs {
+		if nv.Key == vars["var"] {
+			out = nv.Value
+			helpers.Respond(res, req, http.StatusOK, out)
+			return
+		}
+	}
+
+	helpers.Respond(res, req, http.StatusNotFound, out)
+}
+
 func replaceNodeVars(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 
