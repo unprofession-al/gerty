@@ -38,7 +38,7 @@ func main() {
 		mw.RecoverPanic,
 		mw.CorsHeaders,
 		mw.UserContext,
-		mw.WebHook,
+		// mw.WebHook,
 	).Then(r)
 
 	log.Fatal(http.ListenAndServe(":8008", chain))
