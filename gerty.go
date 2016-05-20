@@ -34,7 +34,12 @@ func main() {
 	t := r.PathPrefix("/transformers/").Subrouter()
 	transformers.PopulateRouter(t)
 
-	chain := alice.New(mw.RecoverPanic, mw.CorsHeaders, mw.UserContext).Then(r)
+	chain := alice.New(
+		mw.RecoverPanic,
+		mw.CorsHeaders,
+		mw.UserContext,
+		mw.WebHook,
+	).Then(r)
 
 	log.Fatal(http.ListenAndServe(":8008", chain))
 }
