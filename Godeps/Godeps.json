@@ -25,6 +25,10 @@
 			"Rev": "37aa7c6f5bc95b7264de70cd1f0ca1d39228ebd6"
 		},
 		{
+			"ImportPath": "github.com/sontags/env",
+			"Rev": "bda8d88f75a59b59acacead30e6a476cfd7195a0"
+		},
+		{
 			"ImportPath": "gopkg.in/yaml.v2",
 			"Rev": "53feefa2559fb8dfa8d81baad31be332c97d6c77"
 		}
