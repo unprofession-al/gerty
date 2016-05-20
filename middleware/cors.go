@@ -15,7 +15,8 @@ func CorsHeaders(next http.Handler) http.Handler {
 		res.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 		res.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Accept, Authorization")
 		res.Header().Set("Access-Control-Allow-Credentials", "true")
-		if req.Method == http.MethodOptions {
+		// if req.Method == http.MethodOptions {
+		if req.Method == "OPTIONS" {
 			fmt.Fprintf(res, "Hello")
 			return
 		}
