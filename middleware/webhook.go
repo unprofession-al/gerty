@@ -27,7 +27,7 @@ func (wh *WebHook) Create(next http.Handler) http.Handler {
 				if err != nil {
 					panic("WebHook could not be rendered")
 				}
-				out, err := json.MarshalIndent(data, "    ")
+				out, err := json.MarshalIndent(data, "", "    ")
 				if err != nil {
 					panic("WebHook could not be marshelled")
 				}
