@@ -5,7 +5,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/unprofession-al/gerty/entities"
-	"github.com/unprofession-al/gerty/middleware"
 )
 
 var (
@@ -39,9 +38,8 @@ func PopulateRouter(router *mux.Router) {
 }
 
 func notImplemented(res http.ResponseWriter, req *http.Request) {
-	user := req.Header.Get(middleware.HeaderUserName)
 	res.WriteHeader(http.StatusNotImplemented)
-	out := "Function Not Yet Implemented, " + user + "\n"
+	out := "Function Not Yet Implemented\n"
 	res.Write([]byte(out))
 }
 

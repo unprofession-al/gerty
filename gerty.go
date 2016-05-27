@@ -17,8 +17,12 @@ import (
 )
 
 type configuration struct {
-	Port    string `json:"port"`
-	Address string `json:"address"`
+	Port            string `json:"port"`
+	Address         string `json:"address"`
+	JenkinsFileName string `json:"jenkins_file_name"`
+	JenkinsToken    string `json:"jenkins_token"`
+	JenkinsJobName  string `json:"jenkins_job_name"`
+	JenkinsBaseUrl  string `json:"jenkins_base_url"`
 }
 
 var config configuration
@@ -26,6 +30,10 @@ var config configuration
 func init() {
 	env.Var(&config.Port, "PORT", "8008", "Port to bind to")
 	env.Var(&config.Address, "ADDR", "0.0.0.0", "Address to bind to")
+	env.Var(&config.JenkinsFileName, "JEN_FILE_NAME", "inventory.json", "Name of the backup file")
+	env.Var(&config.JenkinsToken, "JEN_TOKEN", "token", "Jenkins access token")
+	env.Var(&config.JenkinsJobName, "JEN_JOB_NAME", "inventory.archive", "Jenkins job name")
+	env.Var(&config.JenkinsBaseUrl, "JEN_BASE_URL", "NONE", "Jenkins base URL or 'NONE' in order to disable Jenkins WebHook")
 }
 
 func main() {
@@ -49,11 +57,18 @@ func main() {
 	t := r.PathPrefix("/transformers/").Subrouter()
 	transformers.PopulateRouter(t)
 
+	wh := mw.WebHook{
+		FileName: config.JenkinsFileName,
+		Token:    config.JenkinsToken,
+		JobName:  config.JenkinsJobName,
+		BaseUrl:  config.JenkinsBaseUrl,
+	}
+
 	chain := alice.New(
 		mw.RecoverPanic,
 		mw.CorsHeaders,
 		mw.UserContext,
-		// mw.WebHook,
+		wh.Create,
 	).Then(r)
 
 	log.Fatal(http.ListenAndServe(config.Address+":"+config.Port, chain))
