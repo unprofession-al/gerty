@@ -10,6 +10,8 @@ import (
 	"github.com/unprofession-al/gerty/transformers"
 )
 
+const fileIdentifier = "file0"
+
 type WebHook struct {
 	JobName  string
 	BaseUrl  string
@@ -33,7 +35,7 @@ func (wh *WebHook) Create(next http.Handler) http.Handler {
 				}
 
 				params := make(map[string]string)
-				params["json"] = "{'parameter': [{'name':'" + wh.FileName + "', 'file':'file0'}, {'name':'message', 'value':'" + message + "'}]}"
+				params["json"] = "{'parameter': [{'name':'" + wh.FileName + "', 'file':'" + fileIdentifier + "'}, {'name':'message', 'value':'" + message + "'}]}"
 
 				url := wh.BaseUrl + "/job/" + wh.JobName + "/build?token=" + wh.Token
 
@@ -57,7 +59,7 @@ func (wh *WebHook) Create(next http.Handler) http.Handler {
 func makeRequest(uri string, params map[string]string, filename string, data []byte) (*http.Request, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
-	part, err := writer.CreateFormFile("file0", filename)
+	part, err := writer.CreateFormFile(fileIdentifier, filename)
 	if err != nil {
 		return nil, err
 	}

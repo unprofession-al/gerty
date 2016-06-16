@@ -20,7 +20,7 @@ type configuration struct {
 	Port            string `json:"port"`
 	Address         string `json:"address"`
 	JenkinsFileName string `json:"jenkins_file_name"`
-	JenkinsToken    string `json:"jenkins_token"`
+	JenkinsToken    string `json:"-"`
 	JenkinsJobName  string `json:"jenkins_job_name"`
 	JenkinsBaseUrl  string `json:"jenkins_base_url"`
 }
