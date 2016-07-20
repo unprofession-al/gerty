@@ -1,0 +1,47 @@
+#%RAML 0.8
+  ---
+  title: GERTY API
+  baseUri: http://inventory.example.com/api/{version}
+  version: v1
+  /nodes:
+    get:
+      description: Retrieve a list of nodes
+    /{node}:
+      get:
+        description: Retrieve details of tho node specified
+      post:
+        description: Add a node
+      delete:
+        description: Delete an existing node
+      /vars:
+        get:
+          description:
+        post:
+          description:
+        put:
+          description:
+        /{var}:
+          get:
+            description:
+      /roles:
+        /{role}:
+          post:
+            description:
+          delete:
+            description:
+  /roles:
+    get:
+    /{role}:
+      get:
+      post:
+      delete:
+      /vars:
+        post:
+      /parent:
+        delete:
+        /{parent}:
+          post:
+  /system:
+    /whoami:
+      get: 
+
