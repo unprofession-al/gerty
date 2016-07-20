@@ -12,7 +12,7 @@ func RecoverPanic(next http.Handler) http.Handler {
 		defer func() {
 			if err := recover(); err != nil {
 				log.Printf("panic: %+v", err)
-				http.Error(w, http.StatusText(500), 500)
+				http.Error(w, http.StatusText(500), http.StatusInternalServerError)
 			}
 		}()
 
