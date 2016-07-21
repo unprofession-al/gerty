@@ -1,47 +1,95 @@
 #%RAML 0.8
-  ---
-  title: GERTY API
-  baseUri: http://inventory.example.com/api/{version}
-  version: v1
-  /nodes:
-    get:
-      description: Retrieve a list of nodes
-    /{node}:
+---
+title: GERTY
+baseUri: http://inventory.example.com/api/{version}
+version: v1
+securedBy:
+  - basicAuth
+securitySchemes:
+  - basicAuth:
+      description: |
+        Each request must contain the headers necessary for
+        basic authentication
+      type: Basic Authentication
+      describedBy:
+        headers:
+          Authorization:
+            description: |
+              Used to send the Base64 encoded "username:password"
+              credentials
+            type: string
+        responses:
+          401:
+            description: |
+              Unauthorized. Either the provided username and password
+              combination is invalid, or the user is not allowed to
+              access the content provided by the requested URL.
+resourceTypes:
+  - collection:
+      is:  [formatable]
+      description: Collection of available <<resourcePathName>> in Inventory.
       get:
-        description: Retrieve details of tho node specified
+        description: Get a list of <<resourcePathName>>.
+        responses:
+          200:
+            body:
+              application/json:
+  - item:
+      is:  [formatable]
+      description: A specific <<resourcePathName|!singularize>> in Inventory.
+      get:
+        description: Retrieve details of the <<resourcePathName|!singularize|!singularize>> specified
       post:
-        description: Add a node
+        description: Add a <<resourcePathName|!singularize>>
       delete:
-        description: Delete an existing node
-      /vars:
+        description: Delete an existing <<resourcePathName|!singularize>>
+traits:
+  - formatable:
+      queryParameters:
+        d:
+          description: |
+            eg. 'data' - specifies the format which is used by the client to
+            encode the requests body data. This can either be 'yaml' or 'json'.
+            Default: 'json'
+          example: |
+            json
+        f:
+          description: |
+            eg. 'format' - specifies the format in which the response will be
+            rendered. This can either be 'yaml' or 'json'. Default: 'json'
+          example: |
+            json
+/nodes:
+  type: collection
+  /{node}:
+    type: item
+    /vars:
+      get:
+        description:
+      post:
+        description:
+      put:
+        description:
+      /{var}:
         get:
           description:
+    /roles:
+      /{role}:
         post:
           description:
-        put:
-          description:
-        /{var}:
-          get:
-            description:
-      /roles:
-        /{role}:
-          post:
-            description:
-          delete:
-            description:
-  /roles:
-    get:
-    /{role}:
-      get:
-      post:
-      delete:
-      /vars:
-        post:
-      /parent:
         delete:
-        /{parent}:
-          post:
-  /system:
-    /whoami:
-      get: 
-
+          description:
+/roles:
+  type: collection
+  /{role}:
+    type: item
+    /vars:
+      post:
+    /parent:
+      delete:
+      /{parent}:
+        post:
+/system:
+  /whoami:
+    get:
+      description: Validates the Authorization header and returns the user name
