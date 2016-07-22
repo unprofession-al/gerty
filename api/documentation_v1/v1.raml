@@ -1,0 +1,180 @@
+#%RAML 0.8
+---
+title: GERTY
+baseUri: http://inventory.example.com/api/{version}
+version: v1
+securedBy:
+  - basicAuth
+securitySchemes:
+  - basicAuth:
+      description: |
+        Each request must contain the headers necessary for
+        basic authentication
+      type: Basic Authentication
+      describedBy:
+        headers:
+          Authorization:
+            description: |
+              Used to send the Base64 encoded "username:password"
+              credentials
+            type: string
+        responses:
+          401:
+            description: |
+              Unauthorized. Either the provided username and password
+              combination is invalid, or the user is not allowed to
+              access the content provided by the requested URL.
+schemas:
+  - node: !include schemas/node.json.schema
+  - role: !include schemas/role.json.schema
+  - vars: !include schemas/vars.json.scheme
+resourceTypes:
+  - collection:
+      is:  [formatable]
+      description: Collection of available <<resourcePathName>> in Inventory.
+      get:
+        description: Get a list of <<resourcePathName>>.
+        responses:
+          200:
+            description: Great success!
+            body:
+              application/json:
+                example: |
+                  [ "elem-1", "elem-2" ]
+              text/yaml:
+                example: |
+                  - "elem-1"
+                  - "elem-2"
+          500:
+            description: Internal Server Error
+  - item:
+      is:  [formatable]
+      description: A specific <<resourcePathName|!singularize>> in Inventory.
+      get:
+        description: Retrieve details of the <<resourcePathName|!singularize>> specified.
+        responses:
+          200:
+            description: Great success!
+            body:
+              application/json:
+                example: |
+                  <<exampleJsonItem>>
+              text/yaml:
+                example: |
+                  <<exampleYamlItem>>
+          404:
+            description: Not found, <<resourcePathName|!singularize>> does not exist.
+      post:
+        description: Add a <<resourcePathName|!singularize>>
+        responses:
+          201:
+            description: Ok, <<resourcePathName|!singularize>> is created
+            body:
+              application/json:
+                example: |
+                  <<exampleJsonItem>>
+              text/yaml:
+                example: |
+                  <<exampleYamlItem>>
+          409:
+            description: Conflict, <<resourcePathName|!singularize>> already exists.
+          500:
+            description: Internal Server Error, <<resourcePathName|!singularize>> could not be persisted.
+      delete:
+        description: Delete an existing <<resourcePathName|!singularize>>
+        responses:
+          204:
+            description: Ok, <<resourcePathName|!singularize>> is deleted
+            body:
+              application/json:
+                example: |
+                  "deleted"
+              text/yaml:
+                example: |
+                  deleted
+          404:
+            description: Not found, <<resourcePathName|!singularize>> does not exist.
+          500:
+            description: Internal Server Error, <<resourcePathName|!singularize>> could not be persisted.
+traits:
+  - formatable:
+      queryParameters:
+        d:
+          description: |
+            eg. 'data' - specifies the format which is used by the client to
+            encode the requests body data. This can either be 'yaml' or 'json'.
+            Default: 'json'
+          example: |
+            json
+        f:
+          description: |
+            eg. 'format' - specifies the format in which the response will be
+            rendered. This can either be 'yaml' or 'json'. Default: 'json'
+          example: |
+            json
+/nodes:
+  type: collection
+  /{node}:
+    type:
+      item:
+        exampleJsonItem: !include samples/node.json.sample
+        exampleYamlItem: !include samples/node.yaml.sample
+    /vars:
+      get:
+        description: |
+          Gets merged variables of a node. This includes variables from all
+          buckets as well as inhreitad variables from roles and their parents.
+        responses:
+          200:
+            description: Great success!
+            body:
+              application/json:
+                example: !include samples/vars.json.sample
+              text/yaml:
+                example: !include samples/vars.yaml.sample
+          404:
+            description: Not found, node does not exist.
+      post:
+        description: |
+          Add variables to the "native" bucket of the host. In case the host
+          already has variables stored in the "native" bucket, the bucket will
+          be replaced completely.
+      put:
+        description: |
+          Merge the variables sent into the existing "native" bucket. Existing
+          variables will be replaced, new variables will be appended.
+      /{var}:
+        get:
+          description:
+    /roles:
+      /{role}:
+        post:
+          description:
+        delete:
+          description:
+/roles:
+  type: collection
+  /{role}:
+    type:
+      item:
+        exampleJsonItem: !include samples/role.json.sample
+        exampleYamlItem: !include samples/role.yaml.sample
+    /vars:
+      post:
+    /parent:
+      delete:
+      /{parent}:
+        post:
+/system:
+  /whoami:
+    get:
+      description: Validates the Authorization header and returns the user name
+      responses:
+        200:
+          body:
+            text/yaml:
+              example: |
+                admin
+            application/json:
+              example: |
+                "admin"

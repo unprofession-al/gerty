@@ -1,0 +1,23 @@
+[
+  {
+    "key": "var1",
+    "value": {
+      "val1_1": true,
+      "var1_2": 666
+    },
+    "source": "Node",
+    "source_bucket": "native",
+    "old": null,
+    "distance": 0,
+    "tainting": null
+  },
+  {
+    "key": "var2",
+    "value": "Value of var2",
+    "source": "Node",
+    "source_bucket": "native",
+    "old": null,
+    "distance": 0,
+    "tainting": null
+  }
+]

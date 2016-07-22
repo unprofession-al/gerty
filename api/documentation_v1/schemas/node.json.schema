@@ -1,0 +1,24 @@
+{
+  "title": "Node Schema",
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-03/schema",
+  "id": "http://jsonschema.net",
+  "required": [ "name" ],
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "vars": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
