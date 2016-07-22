@@ -27,7 +27,7 @@ func getNode(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	helpers.Respond(res, req, http.StatusCreated, node)
+	helpers.Respond(res, req, http.StatusOK, node)
 }
 
 func addNode(res http.ResponseWriter, req *http.Request) {
@@ -65,7 +65,7 @@ func delNode(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	helpers.Respond(res, req, http.StatusOK, "deleted")
+	helpers.Respond(res, req, http.StatusNoContent, "deleted")
 }
 
 func addNodeVars(res http.ResponseWriter, req *http.Request) {

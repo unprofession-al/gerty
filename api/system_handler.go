@@ -10,5 +10,5 @@ import (
 func whoAmI(res http.ResponseWriter, req *http.Request) {
 	username := req.Header.Get(middleware.HeaderUserName)
 
-	helpers.Respond(res, req, http.StatusCreated, username)
+	helpers.Respond(res, req, http.StatusOK, username)
 }
