@@ -27,7 +27,7 @@ securitySchemes:
 schemas:
   - node: !include schemas/node.json.schema
   - role: !include schemas/role.json.schema
-  - vars: !include schemas/vars.json.scheme
+  - vars: !include schemas/vars.json.schema
 resourceTypes:
   - collection:
       is:  [formatable]
@@ -49,7 +49,7 @@ resourceTypes:
             description: Internal Server Error
   - item:
       is:  [formatable]
-      description: A specific <<resourcePathName|!singularize>> in Inventory.
+      description: A specific <<resourcePathName|!singularize>> in inventory.
       get:
         description: Retrieve details of the <<resourcePathName|!singularize>> specified.
         responses:
@@ -121,6 +121,7 @@ traits:
         exampleYamlItem: !include samples/node.yaml.sample
     /vars:
       get:
+        is: [formatable]
         description: |
           Gets merged variables of a node. This includes variables from all
           buckets as well as inhreitad variables from roles and their parents.
@@ -135,23 +136,64 @@ traits:
           404:
             description: Not found, node does not exist.
       post:
+        is: [formatable]
         description: |
           Add variables to the "native" bucket of the host. In case the host
           already has variables stored in the "native" bucket, the bucket will
           be replaced completely.
+        responses:
+          201:
+            description: Great success!
+          400:
+            description: Bad Request, body data malformed.
+          404:
+            description: Not found, node does not exist.
+          500:
+            description: Internal Server Error, variables could not be persisted.
       put:
+        is: [formatable]
         description: |
           Merge the variables sent into the existing "native" bucket. Existing
           variables will be replaced, new variables will be appended.
-      /{var}:
-        get:
-          description:
+        responses:
+          201:
+            description: Great success!
+          400:
+            description: Bad Request, body data malformed.
+          404:
+            description: Not found, node does not exist.
+          500:
+            description: Internal Server Error, variables could not be persisted.
+      # /{var}:
+      #   get:
+      #     is: [formatable]
+      #     description: Get the value of a given variable
     /roles:
       /{role}:
         post:
-          description:
+          is: [formatable]
+          description: |
+            Appends the given role to a given node. A node may have none, one
+            or multiple roles.
+          responses:
+            201:
+              description: Great success!
+            304:
+              description: Not Modified, role was already linked.
+            404:
+              description: Not Found, node or role does not exist.
+            500:
+              description: Internal Server Error, data could not be persisted.
         delete:
-          description:
+          is: [formatable]
+          description: Deletes the given role to a given node.
+          responses:
+            200:
+              description: Great success!
+            404:
+              description: Not Found, node or role does not exist.
+            500:
+              description: Internal Server Error, data could not be persisted.
 /roles:
   type: collection
   /{role}:
@@ -161,13 +203,47 @@ traits:
         exampleYamlItem: !include samples/role.yaml.sample
     /vars:
       post:
+        is: [formatable]
+        description: |
+          Adds a new variables to the given role. Existing varibles will we
+          overwritten.
+        responses:
+          201:
+            description: Great success!
+          400:
+            description: Bad Request, body data malformed.
+          404:
+            description: Not found, role does not exist.
+          500:
+            description: Internal Server Error, variables could not be stored.
     /parent:
       delete:
+        is: [formatable]
+        description: Unlinks the parent role from the give role.
+        responses:
+          200:
+            description: Great success!
+          404:
+            description: Not found, role or parent does not exist.
+          500:
+            description: |
+              Internal Server Error, changes could not be persisted.
       /{parent}:
         post:
+          is: [formatable]
+          description: Links the given parent role from the give role.
+          responses:
+            200:
+              description: Great success!
+            404:
+              description: Not found, role or parent does not exist.
+            500:
+              description: |
+                Internal Server Error, changes could not be persisted.
 /system:
   /whoami:
     get:
+      is: [formatable]
       description: Validates the Authorization header and returns the user name
       responses:
         200:

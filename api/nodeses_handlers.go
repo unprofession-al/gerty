@@ -80,7 +80,7 @@ func addNodeVars(res http.ResponseWriter, req *http.Request) {
 	var nodeVars map[string]interface{}
 	err = helpers.ParseBodyAsMap(req, &nodeVars)
 	if err != nil {
-		helpers.Respond(res, req, http.StatusInternalServerError, err.Error())
+		helpers.Respond(res, req, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -151,7 +151,7 @@ func replaceNodeVars(res http.ResponseWriter, req *http.Request) {
 	var nodeVars map[string]interface{}
 	err = helpers.ParseBodyAsMap(req, &nodeVars)
 	if err != nil {
-		helpers.Respond(res, req, http.StatusInternalServerError, err.Error())
+		helpers.Respond(res, req, http.StatusBadRequest, err.Error())
 		return
 	}
 

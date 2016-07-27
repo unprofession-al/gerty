@@ -110,7 +110,7 @@ func addRoleVars(res http.ResponseWriter, req *http.Request) {
 	var roleVars map[string]interface{}
 	err = helpers.ParseBodyAsMap(req, &roleVars)
 	if err != nil {
-		helpers.Respond(res, req, http.StatusInternalServerError, err.Error())
+		helpers.Respond(res, req, http.StatusBadRequest, err.Error())
 		return
 	}
 
