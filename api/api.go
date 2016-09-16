@@ -5,11 +5,13 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/unprofession-al/gerty/entities"
+	"github.com/unprofession-al/gerty/providers"
 )
 
 var (
 	ni entities.NodeInteractor
 	ri entities.RoleInteractor
+	np providers.NodeVarsProviders
 )
 
 var routes = make(map[string]routeDefinition)
@@ -19,6 +21,12 @@ var routes = make(map[string]routeDefinition)
 func Inject(nodeInt entities.NodeInteractor, roleInt entities.RoleInteractor) {
 	ni = nodeInt
 	ri = roleInt
+}
+
+func LoadProviders(config string) error {
+	var err error
+	np, err = providers.Bootstrap(config)
+	return err
 }
 
 // PopulateRouter appends all defined routes to a given gorilla mux router.

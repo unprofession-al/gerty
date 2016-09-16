@@ -14,7 +14,6 @@ package providers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -55,7 +54,6 @@ func (np NodeVarsProvider) GetVars(nodename string) (entities.VarBucket, error) 
 	}
 
 	url := strings.Replace(np.Url, "{{nodename}}", nodename, -1)
-	fmt.Println(url)
 	resp, err := http.Get(url)
 	if err != nil {
 		return out, err

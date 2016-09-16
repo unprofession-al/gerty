@@ -101,6 +101,34 @@ func addNodeVars(res http.ResponseWriter, req *http.Request) {
 	helpers.Respond(res, req, http.StatusCreated, node)
 }
 
+func triggerNodeVarsProviders(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+
+	node, err := ni.Get(vars["node"])
+	if err != nil {
+		helpers.Respond(res, req, http.StatusNotFound, err.Error())
+		return
+	}
+
+	buckets, err := np.GetVars(node.Name)
+	if err != nil {
+		helpers.Respond(res, req, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	for _, bucket := range buckets {
+		node.Vars.AddOrReplaceBucket(bucket)
+	}
+
+	err = ni.Save(node)
+	if err != nil {
+		helpers.Respond(res, req, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	helpers.Respond(res, req, http.StatusCreated, node)
+}
+
 func getNodeVars(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 

@@ -17,13 +17,14 @@ import (
 )
 
 type configuration struct {
-	Port            string `json:"port"`
-	Address         string `json:"address"`
-	Store           string `json:"store"`
-	JenkinsFileName string `json:"jenkins_file_name"`
-	JenkinsToken    string `json:"-"`
-	JenkinsJobName  string `json:"jenkins_job_name"`
-	JenkinsBaseUrl  string `json:"jenkins_base_url"`
+	Port              string `json:"port"`
+	Address           string `json:"address"`
+	Store             string `json:"store"`
+	NodeVarsProviders string `json:"nodevars_providers"`
+	JenkinsFileName   string `json:"jenkins_file_name"`
+	JenkinsToken      string `json:"-"`
+	JenkinsJobName    string `json:"jenkins_job_name"`
+	JenkinsBaseUrl    string `json:"jenkins_base_url"`
 }
 
 var config configuration
@@ -32,6 +33,7 @@ func init() {
 	env.Var(&config.Port, "PORT", "8008", "Port to bind to")
 	env.Var(&config.Address, "ADDR", "0.0.0.0", "Address to bind to")
 	env.Var(&config.Store, "STORE", "/tmp/gerty.sqlite3", "Store configuration string")
+	env.Var(&config.NodeVarsProviders, "NODEVARS_PROVIDERS", "[]", "JSON string to configure nodevars providers")
 	env.Var(&config.JenkinsFileName, "JEN_FILE_NAME", "inventory.json", "Name of the backup file")
 	env.Var(&config.JenkinsToken, "JEN_TOKEN", "token", "Jenkins access token")
 	env.Var(&config.JenkinsJobName, "JEN_JOB_NAME", "inventory.archive", "Jenkins job name")
@@ -52,6 +54,10 @@ func main() {
 	r := mux.NewRouter().StrictSlash(true)
 
 	api.Inject(ni, ri)
+	err = api.LoadProviders(config.NodeVarsProviders)
+	if err != nil {
+		panic(err)
+	}
 	a := r.PathPrefix("/api/").Subrouter()
 	api.PopulateRouter(a)
 
