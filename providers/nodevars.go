@@ -1,17 +1,5 @@
 package providers
 
-// use as
-//	providersConfig := `[{"prio":3, "name": "netmgmt", "url": "http://netmgmt.stxt.media.int:9001/nodes/{{nodename}}"}]`
-//	p, _ := providers.Bootstrap(providersConfig)
-//	if err != nil {
-//		panic(err)
-//	}
-//	nodevars, err := p.GetVars("devops-01.stxt.media.int")
-//	if err != nil {
-//		panic(err)
-//	}
-//	fmt.Println(nodevars)
-
 import (
 	"encoding/json"
 	"io/ioutil"
@@ -42,9 +30,10 @@ func (nps NodeVarsProviders) GetVars(nodename string) ([]entities.VarBucket, err
 }
 
 type NodeVarsProvider struct {
-	Name string `json:"name"`
-	Url  string `json:"url"`
-	Prio int    `json:"prio"`
+	Name   string `json:"name"`
+	Url    string `json:"url"`
+	Prio   int    `json:"prio"`
+	Prefix string `json:"prefix"`
 }
 
 func (np NodeVarsProvider) GetVars(nodename string) (entities.VarBucket, error) {
@@ -69,7 +58,20 @@ func (np NodeVarsProvider) GetVars(nodename string) (entities.VarBucket, error) 
 	if err != nil {
 		return out, err
 	}
+
+	if np.Prefix != "" {
+		vars = prefix(vars, np.Prefix)
+	}
+
 	out.Vars = vars
 
 	return out, nil
+}
+
+func prefix(vars map[string]interface{}, prefix string) map[string]interface{} {
+	out := make(map[string]interface{})
+	for name, val := range vars {
+		out[prefix+"_"+name] = val
+	}
+	return out
 }
