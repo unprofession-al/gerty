@@ -4,14 +4,16 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/unprofession-al/gerty/config"
 	"github.com/unprofession-al/gerty/entities"
 	"github.com/unprofession-al/gerty/providers"
 )
 
 var (
-	ni entities.NodeInteractor
-	ri entities.RoleInteractor
-	np providers.NodeVarsProviders
+	ni  entities.NodeInteractor
+	ri  entities.RoleInteractor
+	np  providers.NodeVarsProviders
+	cfg config.Configuration
 )
 
 var routes = make(map[string]routeDefinition)
@@ -23,9 +25,11 @@ func Inject(nodeInt entities.NodeInteractor, roleInt entities.RoleInteractor) {
 	ri = roleInt
 }
 
-func LoadProviders(config string) error {
+func Configure(config config.Configuration) error {
+	cfg = config
+
 	var err error
-	np, err = providers.Bootstrap(config)
+	np, err = providers.Bootstrap(cfg.NodeVarsProviders)
 	return err
 }
 
@@ -41,8 +45,8 @@ func PopulateRouter(router *mux.Router) {
 			}
 
 			api.
-				Methods(route.m).
-				Path(route.p).
+				Methods(route.M).
+				Path(route.P).
 				Name(name).
 				Handler(h)
 		}
@@ -57,9 +61,9 @@ func notImplemented(res http.ResponseWriter, req *http.Request) {
 
 type route struct {
 	// method
-	m string
+	M string `json:"method"`
 	// pattern
-	p string
+	P string `json:"pattern"`
 	// HandlerFunc
 	h http.HandlerFunc
 }

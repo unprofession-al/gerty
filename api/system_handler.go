@@ -12,3 +12,15 @@ func whoAmI(res http.ResponseWriter, req *http.Request) {
 
 	helpers.Respond(res, req, http.StatusOK, username)
 }
+
+func getNodeVarsProviders(res http.ResponseWriter, req *http.Request) {
+	helpers.Respond(res, req, http.StatusOK, np)
+}
+
+func getConfig(res http.ResponseWriter, req *http.Request) {
+	helpers.Respond(res, req, http.StatusOK, cfg)
+}
+
+func sitemapV1(res http.ResponseWriter, req *http.Request) {
+	helpers.Respond(res, req, http.StatusOK, routes["v1"])
+}

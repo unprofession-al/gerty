@@ -8,6 +8,7 @@ import (
 	"github.com/justinas/alice"
 	"github.com/sontags/env"
 	"github.com/unprofession-al/gerty/api"
+	"github.com/unprofession-al/gerty/config"
 	"github.com/unprofession-al/gerty/entities"
 	mw "github.com/unprofession-al/gerty/middleware"
 	"github.com/unprofession-al/gerty/store"
@@ -16,34 +17,23 @@ import (
 	_ "github.com/unprofession-al/gerty/store/sqlitestore"
 )
 
-type configuration struct {
-	Port              string `json:"port"`
-	Address           string `json:"address"`
-	Store             string `json:"store"`
-	NodeVarsProviders string `json:"nodevars_providers"`
-	JenkinsFileName   string `json:"jenkins_file_name"`
-	JenkinsToken      string `json:"-"`
-	JenkinsJobName    string `json:"jenkins_job_name"`
-	JenkinsBaseUrl    string `json:"jenkins_base_url"`
-}
-
-var config configuration
+var cfg config.Configuration
 
 func init() {
-	env.Var(&config.Port, "PORT", "8008", "Port to bind to")
-	env.Var(&config.Address, "ADDR", "0.0.0.0", "Address to bind to")
-	env.Var(&config.Store, "STORE", "/tmp/gerty.sqlite3", "Store configuration string")
-	env.Var(&config.NodeVarsProviders, "NODEVARS_PROVIDERS", "[]", "JSON string to configure nodevars providers")
-	env.Var(&config.JenkinsFileName, "JEN_FILE_NAME", "inventory.json", "Name of the backup file")
-	env.Var(&config.JenkinsToken, "JEN_TOKEN", "token", "Jenkins access token")
-	env.Var(&config.JenkinsJobName, "JEN_JOB_NAME", "inventory.archive", "Jenkins job name")
-	env.Var(&config.JenkinsBaseUrl, "JEN_BASE_URL", "NONE", "Jenkins base URL or 'NONE' in order to disable Jenkins WebHook")
+	env.Var(&cfg.Port, "PORT", "8008", "Port to bind to")
+	env.Var(&cfg.Address, "ADDR", "0.0.0.0", "Address to bind to")
+	env.Var(&cfg.Store, "STORE", "/tmp/gerty.sqlite3", "Store configuration string")
+	env.Var(&cfg.NodeVarsProviders, "NODEVARS_PROVIDERS", "[]", "JSON string to configure nodevars providers")
+	env.Var(&cfg.JenkinsFileName, "JEN_FILE_NAME", "inventory.json", "Name of the backup file")
+	env.Var(&cfg.JenkinsToken, "JEN_TOKEN", "token", "Jenkins access token")
+	env.Var(&cfg.JenkinsJobName, "JEN_JOB_NAME", "inventory.archive", "Jenkins job name")
+	env.Var(&cfg.JenkinsBaseUrl, "JEN_BASE_URL", "NONE", "Jenkins base URL or 'NONE' in order to disable Jenkins WebHook")
 }
 
 func main() {
 	env.Parse("GERTY", false)
 
-	s, err := store.New("sqlitestore", config.Store)
+	s, err := store.New("sqlitestore", cfg.Store)
 	if err != nil {
 		panic(err)
 	}
@@ -53,11 +43,11 @@ func main() {
 
 	r := mux.NewRouter().StrictSlash(true)
 
-	api.Inject(ni, ri)
-	err = api.LoadProviders(config.NodeVarsProviders)
+	err = api.Configure(cfg)
 	if err != nil {
 		panic(err)
 	}
+	api.Inject(ni, ri)
 	a := r.PathPrefix("/api/").Subrouter()
 	api.PopulateRouter(a)
 
@@ -66,10 +56,10 @@ func main() {
 	transformers.PopulateRouter(t)
 
 	wh := mw.WebHook{
-		FileName: config.JenkinsFileName,
-		Token:    config.JenkinsToken,
-		JobName:  config.JenkinsJobName,
-		BaseUrl:  config.JenkinsBaseUrl,
+		FileName: cfg.JenkinsFileName,
+		Token:    cfg.JenkinsToken,
+		JobName:  cfg.JenkinsJobName,
+		BaseUrl:  cfg.JenkinsBaseUrl,
 	}
 
 	chain := alice.New(
@@ -79,5 +69,5 @@ func main() {
 		wh.Create,
 	).Then(r)
 
-	log.Fatal(http.ListenAndServe(config.Address+":"+config.Port, chain))
+	log.Fatal(http.ListenAndServe(cfg.Address+":"+cfg.Port, chain))
 }
