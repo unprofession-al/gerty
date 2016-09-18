@@ -1,30 +1,108 @@
 package api
 
 func init() {
-	routes["v1"] = routeDefinition{
-		"ListNodes":                route{P: "/nodes/", M: "GET", h: listNodes},
-		"GetNode":                  route{P: "/nodes/{node}", M: "GET", h: getNode},
-		"AddNode":                  route{P: "/nodes/{node}", M: "POST", h: addNode},
-		"DelNode":                  route{P: "/nodes/{node}", M: "DELETE", h: delNode},
-		"AddNodeVars":              route{P: "/nodes/{node}/vars", M: "POST", h: addNodeVars},
-		"ReplaceNodeVars":          route{P: "/nodes/{node}/vars", M: "PUT", h: replaceNodeVars},
-		"TriggerNodeVarsProviders": route{P: "/nodes/{node}/vars/providers", M: "PUT", h: triggerNodeVarsProviders},
-		"GetNodeVars":              route{P: "/nodes/{node}/vars", M: "GET", h: getNodeVars},
-		"GetNodeVar":               route{P: "/nodes/{node}/vars/{var}", M: "GET", h: getNodeVar},
-		"LinkNodeToRole":           route{P: "/nodes/{node}/roles/{role}", M: "POST", h: linkNodeToRole},
-		"UnlinkNodeFromRole":       route{P: "/nodes/{node}/roles/{role}", M: "DELETE", h: unlinkNodeFromRole},
-
-		"ListRoles":     route{P: "/roles/", M: "GET", h: listRoles},
-		"GetRole":       route{P: "/roles/{role}", M: "GET", h: getRole},
-		"AddRole":       route{P: "/roles/{role}", M: "POST", h: addRole},
-		"DelRole":       route{P: "/roles/{role}", M: "DELETE", h: delRole},
-		"AddRoleVars":   route{P: "/roles/{role}/vars", M: "POST", h: addRoleVars},
-		"AddRoleParent": route{P: "/roles/{role}/parent/{parent}", M: "POST", h: addRoleParent},
-		"DelRoleParent": route{P: "/roles/{role}/parent", M: "DELETE", h: delRoleParent},
-
-		"SiteMap":              route{P: "/system/sytemap", M: "GET", h: sitemapV1},
-		"WhoAmI":               route{P: "/system/whoami", M: "GET", h: whoAmI},
-		"GetNodeVarsProviders": route{P: "/system/nodevarsproviders", M: "GET", h: getNodeVarsProviders},
-		"GetConfig":            route{P: "/system/config", M: "GET", h: getConfig},
+	routes["v1"] = leafs{
+		"nodes": leaf{
+			E: endpoints{
+				"GET": endpoint{N: "ListNodes", h: listNodes},
+			},
+			L: leafs{
+				"{node}": leaf{
+					E: endpoints{
+						"GET":    endpoint{N: "GetNode", h: getNode},
+						"POST":   endpoint{N: "AddNode", h: addNode},
+						"DELETE": endpoint{N: "DelNode", h: delNode},
+					},
+					L: leafs{
+						"vars": leaf{
+							E: endpoints{
+								"GET":  endpoint{N: "GetNodeVars", h: getNodeVars},
+								"POST": endpoint{N: "AddeNodeVars", h: addNodeVars},
+								"PUT":  endpoint{N: "ReplaceNodesVars", h: replaceNodeVars},
+							},
+							L: leafs{
+								"{var}": leaf{
+									E: endpoints{
+										"GET": endpoint{N: "GetNodeVar", h: getNodeVar},
+									},
+								},
+								"providers": leaf{
+									E: endpoints{
+										"PUT": endpoint{N: "TriggerNodeVarsProviders", h: triggerNodeVarsProviders},
+									},
+								},
+							},
+						},
+						"roles": leaf{
+							L: leafs{
+								"{role}": leaf{
+									E: endpoints{
+										"POST":   endpoint{N: "LinkNodeToRole", h: linkNodeToRole},
+										"DELETE": endpoint{N: "UnlinkNodeFromRole", h: unlinkNodeFromRole},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"roles": leaf{
+			E: endpoints{
+				"GET": endpoint{N: "ListRoles", h: listRoles},
+			},
+			L: leafs{
+				"{role}": leaf{
+					E: endpoints{
+						"GET":    endpoint{N: "GetRole", h: getRole},
+						"POST":   endpoint{N: "AddRole", h: addRole},
+						"DELETE": endpoint{N: "DelRole", h: delRole},
+					},
+					L: leafs{
+						"vars": leaf{
+							E: endpoints{
+								"POST": endpoint{N: "AddRoleVars", h: addRoleVars},
+							},
+						},
+						"parent": leaf{
+							E: endpoints{
+								"DELETE": endpoint{N: "DelRoleParent", h: delRoleParent},
+							},
+							L: leafs{
+								"{parent}": leaf{
+									E: endpoints{
+										"POST": endpoint{N: "AddRoleParent", h: addRoleParent},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"system": leaf{
+			L: leafs{
+				"sitemap": leaf{
+					E: endpoints{
+						"GET": endpoint{N: "SiteMap", h: sitemapV1},
+					},
+				},
+				"whoami": leaf{
+					E: endpoints{
+						"GET": endpoint{N: "WhoAmI", h: whoAmI},
+					},
+				},
+				"nodevarsproviders": leaf{
+					E: endpoints{
+						"GET": endpoint{N: "GetNodeVarsProviders", h: getNodeVarsProviders},
+					},
+				},
+				"config": leaf{
+					E: endpoints{
+						"GET": endpoint{N: "GetConfig", h: getConfig},
+					},
+				},
+			},
+		},
 	}
 }
