@@ -49,22 +49,19 @@ func PopulateRouter(router *mux.Router) {
 }
 
 func appendLeaf(p string, l leaf, router *mux.Router) {
-	api := router.PathPrefix("/" + p).Subrouter()
-
-	for method, ep := range l.E {
-
-		h := ep.h
+	for method, endpoint := range l.E {
+		h := endpoint.h
 		if h == nil {
 			h = notImplemented
 		}
-
-		api.
+		router.
 			Methods(method).
-			Name(ep.N).
+			Path("/" + p).
+			Name(endpoint.N).
 			Handler(h)
 	}
 	for pattern, leaf := range l.L {
-		appendLeaf(pattern, leaf, api)
+		appendLeaf(p+"/"+pattern, leaf, router)
 	}
 }
 
